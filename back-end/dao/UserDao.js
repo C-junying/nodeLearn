@@ -18,7 +18,8 @@ const getListByPage = (page)=>{
 }
 //登录
 const login = (user) => {
-    const sql = "select * from user where email = ?";
+    const sql = "SELECT user.*,role.* from user,user_role,role\
+    where user.userId = user_role.userId and user_role.roleId= role.roleId and user.email=?";
     const params = [user.email];
     return exec(sql,params);
 }

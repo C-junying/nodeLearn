@@ -1,11 +1,11 @@
 <!--  -->
 <template>
   <div class="box">
-    <el-table :data="userList" style="width: 100%" class="el-table">
+    <el-table :data="userList" border  class="el-table">
       <el-table-column label="ID" prop="userId"> </el-table-column>
       <el-table-column label="用户名" prop="userName"> </el-table-column>
       <el-table-column label="邮箱" prop="email"> </el-table-column>
-      <el-table-column label="密码" prop="password"> </el-table-column>
+      <!-- <el-table-column label="密码" prop="password"> </el-table-column> -->
       <el-table-column label="日期" prop="createTime">
         <template slot-scope="scope">
           {{ scope.row.createTime | dateFormat }}
@@ -68,7 +68,7 @@ export default {
       scope: "",
       search: "",
       page: {
-        pageSize: 2,
+        pageSize: 4,
         pageNum: 1,
       },
       count: 0,
@@ -200,11 +200,16 @@ export default {
 };
 </script>
 <style scoped>
-/* .box {
-  width: 80em;
+.box {
+  padding: 20px;
   margin: 0 auto;
-} */
-.el-table {
+  background: #fff;
+}
+/* .el-table {
   height: 400px;
+} */
+.el-table{
+  height: 400px;
+  line-height: 0px !important;
 }
 </style>

@@ -21,3 +21,7 @@ export let doUserAdd = function(user){
 export let doDeleteUser = function(user){
     return doAuthPost("/user/delete",user);
 }
+// 获取用户信息
+export let doGet = function(){
+    return doAuthPost("/user/get");
+}

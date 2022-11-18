@@ -9,6 +9,7 @@ const expressjwt = require('express-jwt');
 // 自定义模块
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+var menuRouter = require('./routes/menu');
 
 var app = express();
 
@@ -51,7 +52,7 @@ app.use(expressjwt({
 
 app.use('/', indexRouter);
 app.use('/user', usersRouter);
-
+app.use('/menu', menuRouter);
 
 // catch 404 and forward to error handler
 // app.use(function(req, res, next) {
