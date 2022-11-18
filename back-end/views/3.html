@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+
+<body>
+    <div id="show">
+        <p>记录条数{{count}}</p>
+        <ul>
+            <li v-for="user in userList" :key="user.id">
+                {{user.userId}}|{{user.userName}}|{{user.password}}|{{user.email}}</li>
+        </ul>
+        <button @click="update(-1)">上一页</button>
+        <button @click="update(1)">下一页</button>
+    </div>
+    <script>
+        var app = new Vue({
+            el: '#show',
+            data: {
+                userList: [{
+                    "userId": 6,
+                    "userName": "张三",
+                    "password": "123456",
+                    "email": "1234@qq.com",
+                    "createTime": "2022-06-17T09:05:22.000Z"
+                },
+                {
+                    "userId": 10,
+                    "userName": "张三",
+                    "password": "123456",
+                    "email": "1235@qq.com",
+                    "createTime": "2022-06-17T09:46:20.000Z"
+                }],
+                count: 0,
+                currentNum: 1,
+                pageSize: 2
+            },
+            mounted: function () {
+                this.pageList();
+            },
+            methods: {
+                pageList: function () {
+                    let self = this;
+                    axios({
+                        method: 'post',
+                        url: 'http://localhost:3000/user/page',
+                        headers: {
+                            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE1LCJ1c2VyTmFtZSI6ImpvbmUiLCJwYXNzd29yZCI6IiQyYSQxMCRJbHVEYVZVTWpsRUVxWk1Qc0RRSmZPV0hWd0dTVU05Q0pGLkJzTzhVL1JuakhwdFRKbDVyTyIsImlhdCI6MTY2ODQ4MDE4NSwiZXhwIjoxNjY4NTY2NTg1fQ.XCiuELjN4FVkeiBzfL0CRAc2uhUlD6E284k-EdrfpZs'
+                        },
+                        data: {
+                            pageSize: self.pageSize,
+                            pageNum: self.currentNum
+                        }
+                    }).then(ret => {
+                        console.log(ret);
+                        if (ret.data.code == 200) {
+                            self.userList = ret.data.list;
+                            self.count = ret.data.count;
+                            console.log(self);
+                        }else{
+							alert("message:"+ret.data.msg);
+						}
+                    });
+                },
+                update: function (n) {
+                    let self = this;
+                    self.currentNum += n;
+                    if (self.currentNum <= 0 || self.currentNum > Math.ceil(self.count / self.pageSize)) {
+                        self.currentNum -= n;
+                        return;
+                    }
+                    self.pageList();
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
