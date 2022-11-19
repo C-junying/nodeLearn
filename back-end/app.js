@@ -10,6 +10,7 @@ const expressjwt = require('express-jwt');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var menuRouter = require('./routes/menu');
+var roleRouter = require('./routes/roles');
 
 var app = express();
 
@@ -28,11 +29,11 @@ app.all('*', (req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");//value = * 所有都可以
   res.header("Access-Control-Allow-Headers", "*");//auth...
   res.header("Access-Control-Allow-Methods", "*");//get post head delete 
-  res.header("X-Powered-By",' 3.2.1')
+  res.header("X-Powered-By", ' 3.2.1')
   res.header("Content-Type", "application/json;charset=utf-8");
-  if(req.method.toLowerCase() === "option"){
+  if (req.method.toLowerCase() === "option") {
     res.send(200);
-  }else{
+  } else {
     next();
   }
 });
@@ -47,32 +48,19 @@ app.use(expressjwt({
   secret: 'david',  // 签名的密钥 或 PublicKey => req.user
   algorithms: ['HS256']
 }).unless({
-  path: ['/user/login','/user/register']  // 指定路径不经过 Token 解析
+  path: ['/user/login', '/user/register']  // 指定路径不经过 Token 解析
 }))
 
 app.use('/', indexRouter);
 app.use('/user', usersRouter);
 app.use('/menu', menuRouter);
+app.use('/role', roleRouter);
 
-// catch 404 and forward to error handler
-// app.use(function(req, res, next) {
-//   next(createError(404));
-// });
+
 //404 错误
 app.use(function (req, res, next) {
   res.status(404).json({ code: 404, message: '页面不存在！' });
 });
-
-//error handler
-// app.use(function(err, req, res, next) {
-  //set locals, only providing error in development
-  // res.locals.message = err.message;
-  // res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-//  render the error page
-//   res.status(err.status || 500);
-//   res.render('error');
-// });
 // 其他错误处理
 app.use(function (err, req, res, next) {
   if (err.name === "UnauthorizedError") {
@@ -81,4 +69,21 @@ app.use(function (err, req, res, next) {
     res.status(err.status || 500).json({ code: err.status || 500, message: err.message });
   }
 });
+
+
+
+// catch 404 and forward to error handler
+// app.use(function(req, res, next) {
+//   next(createError(404));
+// });
+//error handler
+// app.use(function(err, req, res, next) {
+//set locals, only providing error in development
+// res.locals.message = err.message;
+// res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+//  render the error page
+//   res.status(err.status || 500);
+//   res.render('error');
+// });
 module.exports = app;

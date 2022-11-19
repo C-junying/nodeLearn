@@ -7,7 +7,7 @@ export let doLogin = function(user){
 
 // 分页获取用户列表
 export let doUserList = function(page){
-    return doAuthPost("/user/page",page);
+    return doAuthPost("/user/userList",page);
 }
 // 编辑用户操作
 export let doUserEdit = function(user){

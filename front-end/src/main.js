@@ -7,9 +7,11 @@ import App from './App'
 import router from './router'
 import moment from 'moment'
 
+// 使用ElementUI
 Vue.use(ElementUI);
 Vue.config.productionTip = false;
 
+// 过滤器，将时间转为相应格式
 Vue.filter("dateFormat",(date)=>{
   return moment(date).format("YYYY-MM-DD HH:mm:ss");
 })

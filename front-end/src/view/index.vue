@@ -3,13 +3,13 @@
   <div class="">
     <el-container>
       <el-aside width="200px">
-        <el-menu default-active="2" class="el-menu-vertical-demo" background-color="#354054" text-color="#fff" active-text-color="#FFD04B">
-          <el-submenu v-for="menu in menuList" :key="menu.menuId" :index="menu.menuId+''">
+        <el-menu default-active="2" class="el-menu-vertical-demo" background-color="#354054" text-color="#fff" active-text-color="#FFD04B" router>
+          <el-submenu v-for="menu in menuList" :key="menu.menuId" :index="menu.menuUrl + ''">
             <template slot="title">
               <i :class="menu.menuLogo"></i>
               <span>{{ menu.menuName }}</span>
             </template>
-            <el-menu-item v-for="cm in menu.menus" :key="cm.menuId" :index="cm.menuId+''">
+            <el-menu-item v-for="cm in menu.menus" :key="cm.menuId" :index="cm.menuUrl + ''">
               <template slot="title">
                 <i :class="cm.menuLogo"></i>
                 <span>{{ cm.menuName }}</span>
@@ -18,6 +18,7 @@
           </el-submenu>
         </el-menu>
         <!-- <router-link to="/user">用户管理</router-link>
+        <router-link :to="cm.menuUrl">{{ cm.menuName }}</router-link>
         <router-link to="/hello">Hello</router-link> -->
       </el-aside>
       <el-container>
@@ -29,7 +30,17 @@
             </div>
           </div>
         </el-header>
-        <el-main><router-view /></el-main>
+        <el-main>
+          <!-- 面包屑 -->
+          <el-breadcrumb separator-class="el-icon-arrow-right">
+            <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+            <el-breadcrumb-item>用户管理</el-breadcrumb-item>
+          </el-breadcrumb>
+
+          <!-- 分割线 -->
+          <el-divider></el-divider>
+          <router-view></router-view>
+        </el-main>
       </el-container>
     </el-container>
   </div>
@@ -58,11 +69,11 @@ export default {
   //⽅法集合
   methods: {
     handleOpen(key, keyPath) {
-        console.log(key, keyPath);
-      },
-      handleClose(key, keyPath) {
-        console.log(key, keyPath);
-      }
+      console.log(key, keyPath);
+    },
+    handleClose(key, keyPath) {
+      console.log(key, keyPath);
+    },
   },
   //⽣命周期 - 创建完成（可以访问当前this实例）
   created() {},
@@ -88,27 +99,23 @@ export default {
 };
 </script>
 <style scoped>
-.el-header,
-.el-footer {
-  background-color: #354054;
-  color: #FFF;
-  text-align: center;
-  line-height: 60px;
-}
 .el-header {
-  padding-right: 50px;
+  background-color: #334157;
+  color: #fff;
   text-align: right;
+  line-height: 60px;
+  padding-right: 50px;
+  border-left: 2px solid #b3c0d1;
 }
-.el-avatar{
-  overflow:visible;
+.el-avatar {
+  overflow: visible;
 }
 .el-aside {
-  background-color: #354054;
-  color: #333;
+  background-color: #334157;
   text-align: center;
+  height: 720px;
   line-height: 200px;
 }
-
 .el-main {
   background-color: #e9eef3;
   color: #333;
@@ -116,25 +123,15 @@ export default {
   line-height: 160px;
   padding: 10px !important;
 }
-
-body > .el-container {
-  margin-bottom: 40px;
-}
-
-.el-container:nth-child(5) .el-aside,
-.el-container:nth-child(6) .el-aside {
-  line-height: 260px;
-}
-
-.el-container:nth-child(7) .el-aside {
-  line-height: 320px;
-}
-.el-menu{
-  border: none;
-  background-color: #354054;
-}
-.el-menu-item{
-  padding:0px 0 0 20px !important;
+.el-breadcrumb {
+    font-size: 20px;
+    line-height: 30px;
+  }
+.el-menu-item {
+  padding: 0px 0 0 20px !important;
   border-bottom: 1px solid #b3c0d1;
+}
+.el-divider{
+  margin: 10px 0;
 }
 </style>

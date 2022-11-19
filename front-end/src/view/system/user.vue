@@ -1,7 +1,7 @@
 <!--  -->
 <template>
   <div class="box">
-    <el-table :data="userList" border  class="el-table">
+    <el-table :data="userList" border class="el-table" style="width: 100%">
       <el-table-column label="ID" prop="userId"> </el-table-column>
       <el-table-column label="用户名" prop="userName"> </el-table-column>
       <el-table-column label="邮箱" prop="email"> </el-table-column>
@@ -22,10 +22,13 @@
         </template>
       </el-table-column>
     </el-table>
+    <!-- 分页 -->
     <el-pagination background layout="prev, pager, next" :total="count" :page-size="page.pageSize" @current-change="handleCurrentChange">
     </el-pagination>
-    <el-dialog :title="title" :visible.sync="dialogFormVisible">
-      <el-form :model="userForm" ref="userForm">
+
+    <!-- 弹出框 -->
+    <el-dialog :title="title" :visible.sync="dialogFormVisible" style="line-height:20px">
+      <el-form :model="userForm" :rules="rules" ref="userForm">
         <el-form-item label="用户名" prop="userName" :label-width="formLabelWidth">
           <el-input v-model="userForm.userName" autocomplete="off"></el-input>
         </el-form-item>
@@ -35,7 +38,7 @@
         <el-form-item label="邮箱" prop="email" :label-width="formLabelWidth">
           <el-input v-model="userForm.email" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="创建时间" :label-width="formLabelWidth">
+        <el-form-item label="创建时间" prop="createTime" :label-width="formLabelWidth" style="text-align:left;">
           <el-date-picker
             v-model="userForm.createTime"
             type="datetime"
@@ -44,6 +47,12 @@
             value-format="yyyy-MM-dd HH:mm:ss"
           >
           </el-date-picker>
+        </el-form-item>
+        <el-form-item label="角色" prop="roleId" :label-width="formLabelWidth" style="text-align:left;">
+          <el-select v-model="userForm.roleId" placeholder="请选择角色">
+            <el-option v-for="role in roleList" :key="role.roleId" :label="role.roleName" :value="role.roleId"></el-option>
+            <!-- <el-option label="管理员" value="2"></el-option> -->
+          </el-select>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -58,6 +67,7 @@
 //这⾥可以导⼊其他⽂件（⽐如：组件，⼯具js，第三⽅插件js，json⽂件，图⽚⽂件等等）
 //例如：import 《组件名称》 from '《组件路径》';
 import { doUserList, doUserEdit, doUserAdd, doDeleteUser } from "@/api/user";
+import { doRoleList } from "@/api/role";
 
 export default {
   //import引⼊的组件需要注⼊到对象中才能使⽤
@@ -65,7 +75,6 @@ export default {
   data() {
     return {
       userList: [],
-      scope: "",
       search: "",
       page: {
         pageSize: 4,
@@ -84,6 +93,23 @@ export default {
       dialogFormVisible: false, // 显示隐藏控制
       // 判断是添加还是编辑 默认为添加true
       isEditOrAdd: true,
+      roleList: [],
+      rules: {
+        email: [
+          {
+            required: true,
+            message: "请输入邮箱",
+            trigger: "blur",
+          },
+          {
+            pattern: /^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4})*$/,
+            required: true,
+            message: "请输入正确的邮箱",
+            trigger: "blur",
+          },
+        ],
+        password: [{ required: true, message: "请输入密码", trigger: "change" }],
+      },
     };
   },
   //监听属性 类似于data概念
@@ -122,31 +148,43 @@ export default {
     },
     // 提交用户信息
     userSubmit() {
-      console.log(this.userForm);
       let self = this;
       let submitForm = Object.assign({}, self.userForm);
-      if (self.isEditOrAdd) {
-        doUserAdd(submitForm).then((ret) => {
-          console.log(ret);
-          // 弹出提示
-          let type = "error";
-          if (ret.data.code == 200) {
-            type = "success";
-            self.pageList();
+      submitForm.createTime = this.$strFormat(submitForm.createTime);
+
+      // 表单验证
+      self.$refs["userForm"].validate((valid) => {
+        if (valid) {
+          // 判断是编辑还是添加用户
+          if (self.isEditOrAdd) {
+            // 用户添加
+            doUserAdd(submitForm).then((ret) => {
+              // 弹出提示
+              let type = "error";
+              if (ret.data.code == 200) {
+                type = "success";
+                self.pageList();
+              }
+              self.$message({ type: type, message: ret.data.msg, duration: 1000 });
+            });
+          } else {
+            // 编辑用户
+            doUserEdit(submitForm).then((ret) => {
+              let type = "error";
+              if (ret.data.code == 200) {
+                type = "success";
+                self.pageList();
+              }
+              self.$message({ type: type, message: ret.data.msg, duration: 1000 });
+            });
           }
-          self.$message({ type: type, message: ret.data.msg, duration: 1000 });
-        });
-      } else {
-        doUserEdit(submitForm).then((ret) => {
-          console.log(ret);
-          let type = "error";
-          if (ret.data.code == 200) {
-            type = "success";
-            self.pageList();
-          }
-          self.$message({ type: type, message: ret.data.msg, duration: 1000 });
-        });
-      }
+          self.pageList();
+        } else {
+          // 表单验证失败
+          alert("error submit!!");
+          return false;
+        }
+      });
       self.dialogFormVisible = false;
     },
     // 删除用户
@@ -154,7 +192,6 @@ export default {
       console.log(index, row);
       let self = this;
       doDeleteUser(row).then((ret) => {
-        console.log(ret);
         let type = "error";
         if (ret.data.code == 200) {
           type = "success";
@@ -164,7 +201,6 @@ export default {
       });
     },
     handleCurrentChange(val) {
-      console.log(`当前页: ${val}`);
       // 修改当前页
       this.page.pageNum = val;
       // 刷新
@@ -173,11 +209,9 @@ export default {
     pageList: function() {
       let self = this;
       doUserList(self.page).then((ret) => {
-        console.log(ret);
         if (ret.data.code == 200) {
-          self.userList = ret.data.list;
-          self.count = ret.data.count;
-          console.log(self);
+          self.userList = ret.data.data.list;
+          self.count = ret.data.data.count;
         } else {
           self.$message.error({ message: ret.data.msg, duration: 1000 });
         }
@@ -189,6 +223,11 @@ export default {
   //⽣命周期 - 挂载完成（可以访问DOM元素）
   mounted() {
     this.pageList();
+    doRoleList().then((ret) => {
+      if (ret.data.code == 200) {
+        this.roleList = ret.data.data;
+      }
+    });
   },
   beforeCreate() {}, //⽣命周期 - 创建之前
   beforeMount() {}, //⽣命周期 - 挂载之前
@@ -201,15 +240,25 @@ export default {
 </script>
 <style scoped>
 .box {
-  padding: 20px;
+  text-align: center;
+  width: 100%;
   margin: 0 auto;
-  background: #fff;
+  background-color: #ffff;
 }
 /* .el-table {
   height: 400px;
 } */
-.el-table{
+.el-table {
+  width: 100%;
   height: 400px;
   line-height: 0px !important;
+}
+.el-pagination {
+  white-space: nowrap;
+  padding: 15px 5px;
+  color: #303133;
+  font-weight: 700;
+  line-height: 30px;
+  background-color: #ffff;
 }
 </style>

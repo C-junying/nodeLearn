@@ -1,13 +1,13 @@
 <!--  -->
 <template>
   <div class="box">
-    <h1>用户登录</h1>
-    <el-form :model="userFrom" class="login-" :rules="rules" ref="userFrom" label-position="left" label-width="80px">
+    <h1 class="title">用户登录</h1>
+    <el-form :model="userForm" class="login-container" :rules="rules" ref="userForm" label-position="left" label-width="80px">
       <el-form-item label="邮箱" prop="email">
-        <el-input v-model="userFrom.email" placeholder="请输入邮箱"></el-input>
+        <el-input v-model="userForm.email" placeholder="请输入邮箱"></el-input>
       </el-form-item>
       <el-form-item label="密码" prop="password">
-        <el-input v-model="userFrom.password" placeholder="请输入密码" show-password></el-input>
+        <el-input v-model="userForm.password" placeholder="请输入密码" show-password></el-input>
       </el-form-item>
       <el-button type="primary" round @click="login">登录</el-button>
       <el-button type="warning" round @click="resetForm('ruleForm')">重置</el-button>
@@ -26,7 +26,7 @@ export default {
   data() {
     //这⾥存放数据
     return {
-      userFrom: {
+      userForm: {
         email: "",
         password: "",
       },
@@ -57,10 +57,10 @@ export default {
     login() {
       let self = this;
       // 表单验证
-      self.$refs["userFrom"].validate((valid) => {
+      self.$refs["userForm"].validate((valid) => {
         if (valid) {
           // ajax操作
-          doLogin(self.userFrom).then((ret) => {
+          doLogin(self.userForm).then((ret) => {
             console.log(ret);
             let type = "error";
             if (ret.data.code == 200) {
@@ -83,7 +83,7 @@ export default {
       });
     },
     resetForm() {
-      this.$refs["userFrom"].resetFields();
+      this.$refs["userForm"].resetFields();
     },
   },
   //⽣命周期 - 创建完成（可以访问当前this实例）
@@ -101,11 +101,16 @@ export default {
 </script>
 <style scoped>
 .box {
-  width: 450px;
-  box-shadow: 2px 1px 5px #909399;
-  padding: 10px;
-  padding-right: 30px;
-  transform: translate(100%, 50%);
+  margin-top: 100px;
+}
+.login-container {
+  border-radius: 10px;
+  margin: 10px auto;
+  width: 350px;
+  padding: 30px 35px 15px 35px;
   background: #fff;
+  border: 1px solid #eaeaea;
+  text-align: center;
+  box-shadow: 0 0 20px 2px rgba(0, 0, 0, 0.1);
 }
 </style>
