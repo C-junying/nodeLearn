@@ -25,10 +25,10 @@ router.post("/userList", async (req, res, next) => {
     let page = req.body || req.params;
     // 调用DAO获取数据
     let count = await userDao.getCount();
-    console.log("总数：", count[0].sum);
+    console.log("总数：", count[0].count);
     let ret = await userDao.getListByPage(page);
     // 封装返回数据
-    res.json({ code: 200, data: { count: count[0].sum, list: ret } });
+    res.json({ code: 200, data: { count: count[0].count, list: ret } });
 
 })
 // 服务器数据校验 - 正则表达式校验

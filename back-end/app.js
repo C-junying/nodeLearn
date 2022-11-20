@@ -11,6 +11,7 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var menuRouter = require('./routes/menu');
 var roleRouter = require('./routes/roles');
+var goodsRouter = require('./routes/goods');
 
 var app = express();
 
@@ -55,7 +56,7 @@ app.use('/', indexRouter);
 app.use('/user', usersRouter);
 app.use('/menu', menuRouter);
 app.use('/role', roleRouter);
-
+app.use('/goods', goodsRouter);
 
 //404 错误
 app.use(function (req, res, next) {

@@ -1,14 +1,14 @@
 <!--  -->
 <template>
   <div class="box">
-    <el-table :data="userList" border class="el-table" style="width: 100%">
+    <el-table :data="userList" border class="el-table infinite-list" style="width: 100%" max-height="530px">
       <el-table-column label="ID" prop="userId"> </el-table-column>
       <el-table-column label="用户名" prop="userName"> </el-table-column>
       <el-table-column label="邮箱" prop="email"> </el-table-column>
       <!-- <el-table-column label="密码" prop="password"> </el-table-column> -->
       <el-table-column label="日期" prop="createTime">
         <template slot-scope="scope">
-          {{ scope.row.createTime | dateFormat }}
+          <span>{{ scope.row.createTime | dateFormat }}</span>
         </template>
       </el-table-column>
       <el-table-column align="right">
@@ -17,13 +17,22 @@
           <el-button type="primary" @click="handleAdd">添加</el-button>
         </template>
         <template slot-scope="scope">
-          <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-          <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+          <el-button size="mini" type="primary" icon="el-icon-edit" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+          <el-button size="mini" type="danger" icon="el-icon-delete" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
     <!-- 分页 -->
-    <el-pagination background layout="prev, pager, next" :total="count" :page-size="page.pageSize" @current-change="handleCurrentChange">
+    <el-pagination
+      background
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page="page.pageNum"
+      :page-sizes="[1, 2, 5, 10]"
+      :page-size="page.pageSize"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="total"
+    >
     </el-pagination>
 
     <!-- 弹出框 -->
@@ -77,10 +86,10 @@ export default {
       userList: [],
       search: "",
       page: {
-        pageSize: 4,
+        pageSize: 5,
         pageNum: 1,
       },
-      count: 0,
+      total: 0,
       title: "",
       formLabelWidth: "80px",
       userForm: {
@@ -206,12 +215,17 @@ export default {
       // 刷新
       this.pageList();
     },
+    //数据条数发生改变时
+    handleSizeChange(newSize) {
+      this.page.pageSize = newSize;
+      this.pageList();
+    },
     pageList: function() {
       let self = this;
       doUserList(self.page).then((ret) => {
         if (ret.data.code == 200) {
           self.userList = ret.data.data.list;
-          self.count = ret.data.data.count;
+          self.total = ret.data.data.count;
         } else {
           self.$message.error({ message: ret.data.msg, duration: 1000 });
         }
@@ -248,17 +262,4 @@ export default {
 /* .el-table {
   height: 400px;
 } */
-.el-table {
-  width: 100%;
-  height: 400px;
-  line-height: 0px !important;
-}
-.el-pagination {
-  white-space: nowrap;
-  padding: 15px 5px;
-  color: #303133;
-  font-weight: 700;
-  line-height: 30px;
-  background-color: #ffff;
-}
 </style>

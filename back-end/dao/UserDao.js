@@ -7,7 +7,7 @@ const queryAll = () => {
 }
 // 查询用户总数
 const getCount = () => {
-    const sql = "SELECT count(*) as sum FROM user";
+    const sql = "SELECT count(*) as count FROM user";
     return BaseDao.execute(sql);
 }
 // 分页查询

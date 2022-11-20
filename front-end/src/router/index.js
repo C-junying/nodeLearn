@@ -29,6 +29,16 @@ export default new Router({
           // component: HelloWorld
           component: () => import("@/components/HelloWorld")
         },
+        {
+          path: '/system/order',
+          name: 'order',
+          component: () => import("@/view/system/order")
+        },
+        {
+          path: '/system/goods',
+          name: 'goods',
+          component: () => import("@/view/system/Goods/goods")
+        },
       ]
     },
   ]

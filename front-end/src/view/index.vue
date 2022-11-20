@@ -3,13 +3,13 @@
   <div class="">
     <el-container>
       <el-aside width="200px">
-        <el-menu default-active="2" class="el-menu-vertical-demo" background-color="#354054" text-color="#fff" active-text-color="#FFD04B" router>
-          <el-submenu v-for="menu in menuList" :key="menu.menuId" :index="menu.menuUrl + ''">
+        <el-menu default-active="/system/user" class="el-menu-vertical-demo" background-color="#354054" text-color="#fff" active-text-color="#FFD04B" router>
+          <el-submenu v-for="menu in menuList" :key="menu.menuId" :index="menu.menuId + ''">
             <template slot="title">
               <i :class="menu.menuLogo"></i>
               <span>{{ menu.menuName }}</span>
             </template>
-            <el-menu-item v-for="cm in menu.menus" :key="cm.menuId" :index="cm.menuUrl + ''">
+            <el-menu-item v-for="cm in menu.menus" :key="cm.menuId" :index="cm.menuUrl + ''" @click="setMenuTitle($event)">
               <template slot="title">
                 <i :class="cm.menuLogo"></i>
                 <span>{{ cm.menuName }}</span>
@@ -34,7 +34,8 @@
           <!-- 面包屑 -->
           <el-breadcrumb separator-class="el-icon-arrow-right">
             <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-            <el-breadcrumb-item>用户管理</el-breadcrumb-item>
+            <el-breadcrumb-item v-show="menu">{{menu}}</el-breadcrumb-item>
+            <el-breadcrumb-item v-show="menuTitle">{{menuTitle}}</el-breadcrumb-item>
           </el-breadcrumb>
 
           <!-- 分割线 -->
@@ -60,6 +61,8 @@ export default {
     return {
       user: {},
       menuList: {},
+      menu:"系统管理",
+      menuTitle:"用户管理",
     };
   },
   //监听属性 类似于data概念
@@ -74,6 +77,11 @@ export default {
     handleClose(key, keyPath) {
       console.log(key, keyPath);
     },
+    setMenuTitle(event){
+      // console.log(event.$el.parentNode.previousSibling.innerText.trim());
+      this.menu = event.$el.parentNode.previousSibling.innerText.trim();
+      this.menuTitle = event.$el.children[1].innerHTML.trim();
+    }
   },
   //⽣命周期 - 创建完成（可以访问当前this实例）
   created() {},
