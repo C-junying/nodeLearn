@@ -20,11 +20,26 @@ export default {
   color: #2c3e50;
   height: 100%;
 }
-.el-main[data-v-4f795181]{
+.el-main[data-v-4f795181] {
   line-height: 0px !important;
+}
+.my-breadcrumb {
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  line-height: 100px;
+}
+.my-breadcrumb .el-breadcrumb {
+  font-size: 20px;
+  padding: 10px 20px;
+}
+.my-breadcrumb .el-divider {
+  margin-top: 0px;
+  margin-bottom: 5px;
 }
 .el-table {
   min-height: 400px;
+  background-color: #ffff;
 }
 .el-pagination {
   white-space: nowrap;

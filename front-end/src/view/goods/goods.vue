@@ -1,11 +1,21 @@
 <!--  -->
 <template>
   <div>
+    <div class="my-breadcrumb">
+      <!-- 面包屑 -->
+      <el-breadcrumb separator-class="el-icon-arrow-right">
+        <el-breadcrumb-item>首页</el-breadcrumb-item>
+        <el-breadcrumb-item>商品管理</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/goods/goodsList' }">商品清单</el-breadcrumb-item>
+      </el-breadcrumb>
+      <!-- 分割线 -->
+      <el-divider></el-divider>
+    </div>
     <!-- 1. 搜索区域 -->
     <div class="header">
       <el-input v-model="inputSeach.search" placeholder="请输入内容"></el-input>
       <el-button type="primary" @click="searchInput">查询</el-button>
-      <el-button type="primary">添加</el-button>
+      <el-button type="primary" @click="addGoods">添加</el-button>
     </div>
     <!-- 2. 表格区域展示视图数据 -->
     <div class="wrapper">
@@ -15,7 +25,7 @@
         <el-table-column prop="goods_name" label="商品名称" width="100" show-overflow-tooltip> </el-table-column>
         <el-table-column prop="goods_price" label="商品价格" width="100"> </el-table-column>
         <el-table-column prop="goods_number" label="商品数量" width="100"> </el-table-column>
-        <el-table-column prop="cat_id" label="规格类目" width="100"> </el-table-column>
+        <el-table-column prop="cat_name" label="规格类目" width="100"> </el-table-column>
         <el-table-column prop="goods_pic" label="商品图片" show-overflow-tooltip> </el-table-column>
         <el-table-column prop="sell_point" label="商品卖点" show-overflow-tooltip> </el-table-column>
         <el-table-column prop="goods_introduce" label="商品描述" show-overflow-tooltip> </el-table-column>
@@ -39,6 +49,7 @@
       >
       </el-pagination>
     </div>
+    <GoodsDialog ref="dialog" />
   </div>
 </template>
 
@@ -46,15 +57,17 @@
 //这⾥可以导⼊其他⽂件（⽐如：组件，⼯具js，第三⽅插件js，json⽂件，图⽚⽂件等等）
 //例如：import 《组件名称》 from '《组件路径》';
 import { doGoodsList, doSearch } from "@/api/goods";
-
+import GoodsDialog from "../goods/GoodsDialog.vue";
 export default {
   //import引⼊的组件需要注⼊到对象中才能使⽤
-  components: {},
+  components: {
+    GoodsDialog,
+  },
   data() {
     //这⾥存放数据
     return {
-      inputSeach:{
-        search:""
+      inputSeach: {
+        search: "",
       },
       tableData: [],
       total: 10,
@@ -70,6 +83,23 @@ export default {
   watch: {},
   //⽅法集合
   methods: {
+    // 添加商品--出现弹窗
+    addGoods() {
+      //修改子组件实例的数据
+      this.$refs.dialog.goodsForm = {
+        goods_name: "",
+        goods_price: "",
+        goods_number: "",
+        sell_point: "",
+        goods_pic: "",
+        goods_introduce: "",
+        cat_id: "",
+        created: "",
+        cat_name: "",
+      };
+      this.$refs.dialog.dialogVisible = true;
+      this.$refs.dialog.isEditOrAdd = true;
+    },
     handleCurrentChange(val) {
       // 修改当前页
       this.page.pageNum = val;
@@ -83,17 +113,17 @@ export default {
     },
     searchInput() {
       let self = this;
-      console.log("Hello:",self.inputSeach.search);
+      console.log("Hello:", self.inputSeach.search);
       self.page.pageNum = 1;
       if (!self.inputSeach.search) {
         self.goodsList();
         return;
       }
       doSearch(self.inputSeach).then((ret) => {
-        if (ret.data.code == 200 &&ret.data.data.length>0) {
+        if (ret.data.code == 200 && ret.data.data.length > 0) {
           self.tableData = ret.data.data;
           self.total = ret.data.data.length;
-        }else{
+        } else {
           self.tableData = [];
           self.total = 0;
           self.$message({ type: "error", message: "没有任何商品记录", duration: 2000 });
@@ -101,8 +131,13 @@ export default {
       });
     },
     // 编辑操作
-    handleEdit() {
-      console.log("编辑");
+    handleEdit(index, goods) {
+      //修改子组件实例的数据
+      this.$refs.dialog.goodsForm = 
+      this.$refs.dialog.dialogVisible = true;
+      this.$refs.dialog.isEditOrAdd = false;
+      this.$refs.dialog.goodsForm = Object.assign({}, goods);
+      this.$refs.dialog.goodsForm.created = new Date(Number(this.$refs.dialog.goodsForm.created));
     },
     // 删除操作
     handleDelete() {
@@ -140,9 +175,6 @@ export default {
 };
 </script>
 <style scoped>
-.goods {
-  margin: 20px;
-}
 .header {
   display: flex;
 }

@@ -3,13 +3,20 @@
   <div class="">
     <el-container>
       <el-aside width="200px">
-        <el-menu default-active="/system/user" class="el-menu-vertical-demo" background-color="#354054" text-color="#fff" active-text-color="#FFD04B" router>
+        <el-menu
+          default-active="/system/user"
+          class="el-menu-vertical-demo"
+          background-color="#354054"
+          text-color="#fff"
+          active-text-color="#FFD04B"
+          router
+        >
           <el-submenu v-for="menu in menuList" :key="menu.menuId" :index="menu.menuId + ''">
             <template slot="title">
               <i :class="menu.menuLogo"></i>
               <span>{{ menu.menuName }}</span>
             </template>
-            <el-menu-item v-for="cm in menu.menus" :key="cm.menuId" :index="cm.menuUrl + ''" @click="setMenuTitle($event)">
+            <el-menu-item v-for="cm in menu.menus" :key="cm.menuId" :index="cm.menuUrl + ''">
               <template slot="title">
                 <i :class="cm.menuLogo"></i>
                 <span>{{ cm.menuName }}</span>
@@ -31,15 +38,6 @@
           </div>
         </el-header>
         <el-main>
-          <!-- 面包屑 -->
-          <el-breadcrumb separator-class="el-icon-arrow-right">
-            <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-            <el-breadcrumb-item v-show="menu">{{menu}}</el-breadcrumb-item>
-            <el-breadcrumb-item v-show="menuTitle">{{menuTitle}}</el-breadcrumb-item>
-          </el-breadcrumb>
-
-          <!-- 分割线 -->
-          <el-divider></el-divider>
           <router-view></router-view>
         </el-main>
       </el-container>
@@ -61,8 +59,8 @@ export default {
     return {
       user: {},
       menuList: {},
-      menu:"系统管理",
-      menuTitle:"用户管理",
+      menu: "系统管理",
+      menuTitle: "用户管理",
     };
   },
   //监听属性 类似于data概念
@@ -77,11 +75,6 @@ export default {
     handleClose(key, keyPath) {
       console.log(key, keyPath);
     },
-    setMenuTitle(event){
-      // console.log(event.$el.parentNode.previousSibling.innerText.trim());
-      this.menu = event.$el.parentNode.previousSibling.innerText.trim();
-      this.menuTitle = event.$el.children[1].innerHTML.trim();
-    }
   },
   //⽣命周期 - 创建完成（可以访问当前this实例）
   created() {},
@@ -132,14 +125,14 @@ export default {
   padding: 10px !important;
 }
 .el-breadcrumb {
-    font-size: 20px;
-    line-height: 30px;
-  }
+  font-size: 20px;
+  line-height: 30px;
+}
 .el-menu-item {
   padding: 0px 0 0 20px !important;
   border-bottom: 1px solid #b3c0d1;
 }
-.el-divider{
+.el-divider {
   margin: 10px 0;
 }
 </style>

@@ -5,6 +5,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const bodyParser = require("body-parser")
 const expressjwt = require('express-jwt');
+const cors = require('cors');
 
 // 自定义模块
 var indexRouter = require('./routes/index');
@@ -38,7 +39,8 @@ app.all('*', (req, res, next) => {
     next();
   }
 });
-
+// enable CORS
+app.use(cors());
 
 //注意添加位置
 app.use(bodyParser.urlencoded({ extended: false }));

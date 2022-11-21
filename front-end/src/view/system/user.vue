@@ -1,6 +1,16 @@
 <!--  -->
 <template>
   <div class="box">
+    <div class="my-breadcrumb">
+      <!-- 面包屑 -->
+      <el-breadcrumb separator-class="el-icon-arrow-right">
+        <el-breadcrumb-item>首页</el-breadcrumb-item>
+        <el-breadcrumb-item>系统管理</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/system/user' }">用户管理</el-breadcrumb-item>
+      </el-breadcrumb>
+      <!-- 分割线 -->
+      <el-divider></el-divider>
+    </div>
     <el-table :data="userList" border class="el-table infinite-list" style="width: 100%" max-height="530px">
       <el-table-column label="ID" prop="userId"> </el-table-column>
       <el-table-column label="用户名" prop="userName"> </el-table-column>
@@ -153,13 +163,13 @@ export default {
       // 显示弹出框
       this.dialogFormVisible = true;
       this.userForm = Object.assign({}, user);
-      this.userForm.createTime = new Date(this.userForm.createTime);
+      this.userForm.createTime = new Date(Number(this.userForm.createTime));
     },
     // 提交用户信息
     userSubmit() {
       let self = this;
       let submitForm = Object.assign({}, self.userForm);
-      submitForm.createTime = this.$strFormat(submitForm.createTime);
+      submitForm.createTime = this.$moment(submitForm.createTime);
 
       // 表单验证
       self.$refs["userForm"].validate((valid) => {
@@ -257,9 +267,6 @@ export default {
   text-align: center;
   width: 100%;
   margin: 0 auto;
-  background-color: #ffff;
 }
-/* .el-table {
-  height: 400px;
-} */
+
 </style>

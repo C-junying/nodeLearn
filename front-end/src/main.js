@@ -13,19 +13,11 @@ Vue.config.productionTip = false;
 
 // 过滤器，将时间转为相应格式
 Vue.filter("dateFormat",(date)=>{
-  return moment(date).format("YYYY-MM-DD HH:mm:ss");
+  return moment(Number(date)).format("YYYY-MM-DD HH:mm:ss");
 })
-
-// 日期转为字符串 日期格式：2019/12/01 12:30:15
-Vue.prototype.$strFormat = function(date){
-  return date.toLocaleString().replace(/\//g,"-");
-};
-// 字符串转为日期 字符串格式：2019-12-01 12:30:15
-Vue.prototype.$dateFormat = function(str){
-  str = str.replace(/-/g,"/");
-  var date = new Date(str);
-  return date.toLocaleString().replace(/\//g,"-");
-};
+Vue.prototype.$moment = function(date){
+  return moment(date).valueOf();
+}
 
 /* eslint-disable no-new */
 new Vue({

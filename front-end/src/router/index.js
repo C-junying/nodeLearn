@@ -24,9 +24,13 @@ export default new Router({
           component:()=>import("@/view/system/user")
         },
         {
+          path:'/system/menu',
+          name:'menu',
+          component:()=>import("@/view/system/menu")
+        },
+        {
           path: '/system/hello',
           name: 'HelloWorld',
-          // component: HelloWorld
           component: () => import("@/components/HelloWorld")
         },
         {
@@ -35,9 +39,9 @@ export default new Router({
           component: () => import("@/view/system/order")
         },
         {
-          path: '/system/goods',
+          path: '/goods/goodsList',
           name: 'goods',
-          component: () => import("@/view/system/Goods/goods")
+          component: () => import("@/view/goods/goods")
         },
       ]
     },
