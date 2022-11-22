@@ -7,7 +7,13 @@
             width="70%" 宽度 大小
 
        -->
-    <el-dialog :title="isEditOrAdd ? '添加商品' : '编辑商品'" :visible.sync="dialogVisible" width="70%" style="margin-top:-10vh">
+    <el-dialog
+      :title="isEditOrAdd ? '添加商品' : '编辑商品'"
+      :before-close="iconClose"
+      :visible.sync="dialogVisible"
+      width="70%"
+      style="margin-top:-10vh"
+    >
       <!-- 内容区域 -->
       <el-form :model="goodsForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
         <el-form-item label="类目选择" prop="cat_name">
@@ -15,33 +21,36 @@
           <span style="margin-left:10px;">{{ goodsForm.cat_name }}</span>
         </el-form-item>
         <el-form-item label="商品名称" prop="goods_name">
-          <el-input v-model="goodsForm.goods_name"></el-input>
+          <el-input v-model="goodsForm.goods_name" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="商品价格" prop="goods_price">
-          <el-input v-model="goodsForm.goods_price"></el-input>
+          <el-input v-model="goodsForm.goods_price" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="商品数量" prop="goods_number">
-          <el-input v-model="goodsForm.goods_number"></el-input>
+          <el-input v-model="goodsForm.goods_number" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="发布时间" required>
-          <el-form-item prop="created">
-            <el-date-picker type="datetime" placeholder="选择日期" v-model="goodsForm.created" style="width: 100%"></el-date-picker>
+        <el-form-item label="更新时间" required>
+          <el-form-item prop="updated">
+            <el-date-picker type="datetime" placeholder="选择日期" v-model="goodsForm.updated" style="width: 100%"></el-date-picker>
           </el-form-item>
         </el-form-item>
         <el-form-item label="商品卖点" prop="sell_point">
-          <el-input v-model="goodsForm.sell_point"></el-input>
+          <el-input v-model="goodsForm.sell_point" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="商品图片" prop="goods_pic">
-          <el-button type="primary" @click="innerVisibleImg = true">上传图片</el-button>
-          <img :src="goodsForm.goods_pic" height="200px" style="margin-left: 10px" alt="" />
+          <div class="img-flex">
+            <el-button type="primary" @click="innerVisibleImg = true">上传图片</el-button>
+            <img :src="goodsForm.goods_pic" min-height="10px" max-height="200px" style="margin-left: 10px;max-width:200px" alt="" />
+          </div>
         </el-form-item>
         <el-form-item label="商品描述" prop="goods_introduce">
-          <textarea name="" id="" cols="60" rows="10" v-model="goodsForm.goods_introduce"></textarea>
+          <GoodsEditor ref="myEditor" @sendEditor="sendEditor" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm('ruleForm')">确定</el-button>
-        <el-button @click="resetForm('ruleForm')">重置</el-button>
+        <el-button type="primary" @click="submitForm">确定</el-button>
+        <el-button type="warning" @click="resetForm">重置</el-button>
+        <el-button @click="iconClose">取消</el-button>
       </div>
       <!-- 1. 内弹框--- 类目选择 -->
       <el-dialog width="40%" title="类目选择" :visible.sync="innerVisible" append-to-body style="margin-top:-8vh">
@@ -52,15 +61,10 @@
         </span>
       </el-dialog>
       <!-- 2. 内弹框 --- 上传图片 -->
-      <el-dialog
-        width="40%"
-        title="上传图片"
-        :visible.sync="innerVisibleImg"
-        append-to-body
-      >
+      <el-dialog width="40%" title="上传图片" :visible.sync="innerVisibleImg" append-to-body>
         <UploadImg @sendImg="sendImg" ref="upload" />
         <span slot="footer" class="dialog-footer">
-          <el-button @click="innerVisibleImg = false">取 消</el-button>
+          <el-button @click="closeImg">取 消</el-button>
           <el-button type="primary" @click="showImg">确 定</el-button>
         </span>
       </el-dialog>
@@ -74,13 +78,14 @@
 import TreeGoods from "../goods/TreeGoods.vue";
 import UploadImg from "../goods/UploadImg.vue";
 import GoodsEditor from "../goods/GoodsEditor.vue";
+import { doAddGoods, doUpdateGoods } from "@/api/goods";
 
 export default {
   //import引⼊的组件需要注⼊到对象中才能使⽤
   components: {
     TreeGoods,
     UploadImg,
-    GoodsEditor
+    GoodsEditor,
   },
   data() {
     //这⾥存放数据
@@ -94,18 +99,23 @@ export default {
       treeData: {}, //接受tree数据
       goodsForm: {
         //表单容器-对象
-        goods_name: "", //商品名称
+        goods_id: "",
+        goods_name: "",
         goods_price: "",
         goods_number: "",
         sell_point: "",
         goods_pic: "",
         goods_introduce: "",
-        cat_id: "", //商品类目
-        created: "", //商品时间
+        cat_id: "",
+        barcode: null,
+        goods_state: null,
+        created: "",
+        updated: "",
         cat_name: "",
       },
       rules: {
         //校验规则
+        cat_name: [{ required: true, message: "请选择类目", trigger: "blur" }],
         goods_name: [{ required: true, message: "请输入商品名称", trigger: "blur" }],
         goods_price: [
           { required: true, message: "请输入价格", trigger: "blur" },
@@ -134,6 +144,12 @@ export default {
   watch: {},
   //⽅法集合
   methods: {
+    // 关闭表单弹窗
+    iconClose() {
+      this.dialogVisible = false;
+      this.$refs.ruleForm.resetFields();
+      this.$refs.myEditor.editor.txt.clear();
+    },
     // 显示tree数据
     showTreeData() {
       this.innerVisible = false;
@@ -145,6 +161,10 @@ export default {
     sendTreeData(val) {
       console.log("tree数据", val);
       this.treeData = val;
+    },
+    // 接受GoodsEditor数据
+    sendEditor(val) {
+      this.goodsForm.goods_introduce = val;
     },
     //显示图片的地址
     sendImg(val) {
@@ -158,11 +178,40 @@ export default {
       //清空图片上传的列表
       this.$refs.upload.fileList = [];
     },
+    // 关闭上传图片弹窗
+    closeImg() {
+      this.innerVisibleImg = false;
+      //清空图片上传的列表
+      this.$refs.upload.fileList = [];
+    },
     // 提交表单
-    submitForm(formName) {
-      this.$refs[formName].validate((valid) => {
+    submitForm() {
+      let self = this;
+      let submitForm = Object.assign({}, self.goodsForm);
+      submitForm.updated = self.$moment(submitForm.updated);
+      console.log(submitForm);
+      self.$refs["ruleForm"].validate((valid) => {
         if (valid) {
-          alert("submit!");
+          if (self.isEditOrAdd) {
+            doAddGoods(submitForm).then((ret) => {
+              let type = "error";
+              if (ret.data.code == 200) {
+                type = "success";
+              }
+              self.$message({ type: type, message: ret.data.msg, duration: 1000 });
+              self.$parent.goodsList();
+            });
+          } else {
+            doUpdateGoods(submitForm).then((ret) => {
+              let type = "error";
+              if (ret.data.code == 200) {
+                type = "success";
+              }
+              self.$message({ type: type, message: ret.data.msg, duration: 1000 });
+              self.$parent.goodsList();
+            });
+          }
+          self.dialogVisible = false;
         } else {
           console.log("error submit!!");
           return false;
@@ -170,8 +219,29 @@ export default {
       });
     },
     // 重置表单
-    resetForm(formName) {
-      this.$refs[formName].resetFields();
+    resetForm() {
+      this.$refs.ruleForm.resetFields();
+      this.goodsForm = {
+        goods_name: "",
+        goods_price: "",
+        goods_number: "",
+        sell_point: "",
+        goods_pic: "",
+        goods_introduce: "",
+        cat_id: "",
+        barcode: null,
+        goods_state: null,
+        created: "",
+        updated: "",
+        cat_name: "",
+      };
+      //单独-清空编辑器内容--editor.txt.clear()
+      this.$refs.myEditor.editor.txt.clear();
+    },
+    setGoodsEditor(){
+      this.$nextTick(()=>{
+        this.$refs.myEditor.editor.txt.html(this.goodsForm.goods_introduce);
+      });
     },
   },
   //⽣命周期 - 创建完成（可以访问当前this实例）
@@ -190,5 +260,10 @@ export default {
 <style scoped>
 .box {
   text-align: left;
+}
+.img-flex {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
 }
 </style>

@@ -46,7 +46,7 @@
     </el-pagination>
 
     <!-- 弹出框 -->
-    <el-dialog :title="title" :visible.sync="dialogFormVisible" style="line-height:20px">
+    <el-dialog :title="title" :before-close="iconClose" :visible.sync="dialogFormVisible" style="line-height:20px">
       <el-form :model="userForm" :rules="rules" ref="userForm">
         <el-form-item label="用户名" prop="userName" :label-width="formLabelWidth">
           <el-input v-model="userForm.userName" autocomplete="off"></el-input>
@@ -75,7 +75,7 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button @click="iconClose">取 消</el-button>
         <el-button type="primary" @click="userSubmit">确 定</el-button>
       </div>
     </el-dialog>
@@ -165,6 +165,11 @@ export default {
       this.userForm = Object.assign({}, user);
       this.userForm.createTime = new Date(Number(this.userForm.createTime));
     },
+    // 关闭弹窗
+    iconClose(){
+      this.dialogFormVisible = false;
+      this.$refs.userForm.resetFields();
+    },
     // 提交用户信息
     userSubmit() {
       let self = this;
@@ -198,26 +203,41 @@ export default {
             });
           }
           self.pageList();
+          self.dialogFormVisible = false;
         } else {
           // 表单验证失败
           alert("error submit!!");
           return false;
         }
       });
-      self.dialogFormVisible = false;
     },
     // 删除用户
     handleDelete(index, row) {
       console.log(index, row);
       let self = this;
-      doDeleteUser(row).then((ret) => {
-        let type = "error";
-        if (ret.data.code == 200) {
-          type = "success";
-          self.pageList();
-        }
-        self.$message({ type: type, message: ret.data.msg, duration: 1000 });
-      });
+      self
+        .$confirm("此操作将永久删除该用户, 是否继续?", "提示", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+        })
+        .then(() => {
+          doDeleteUser(row).then((ret) => {
+            let type = "error";
+            if (ret.data.code == 200) {
+              type = "success";
+            }
+            self.$message({ type: type, message: ret.data.msg, duration: 1000 });
+            self.pageList();
+          });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除",
+            duration: 2000
+          });
+        });
     },
     handleCurrentChange(val) {
       // 修改当前页
@@ -268,5 +288,4 @@ export default {
   width: 100%;
   margin: 0 auto;
 }
-
 </style>

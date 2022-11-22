@@ -24,7 +24,9 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-// app.use(express.static(path.join(__dirname, 'public')));
+//将静态资源托管，这样才能在浏览器上直接访问预览图片或则html页面
+app.use(express.static(path.join(__dirname, './public')));
+
 
 //后端解决跨域问题：跨域设置
 app.all('*', (req, res, next) => {
@@ -39,8 +41,7 @@ app.all('*', (req, res, next) => {
     next();
   }
 });
-// enable CORS
-app.use(cors());
+
 
 //注意添加位置
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -51,7 +52,7 @@ app.use(expressjwt({
   secret: 'david',  // 签名的密钥 或 PublicKey => req.user
   algorithms: ['HS256']
 }).unless({
-  path: ['/user/login', '/user/register']  // 指定路径不经过 Token 解析
+  path: ['/user/login', '/user/register', '/goods/upload', /^\/images\/.*/]  // 指定路径不经过 Token 解析
 }))
 
 app.use('/', indexRouter);
@@ -59,6 +60,7 @@ app.use('/user', usersRouter);
 app.use('/menu', menuRouter);
 app.use('/role', roleRouter);
 app.use('/goods', goodsRouter);
+app.use('/images', express.static(path.join(__dirname, './public/uploads')));
 
 //404 错误
 app.use(function (req, res, next) {

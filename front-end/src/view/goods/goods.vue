@@ -1,6 +1,6 @@
 <!--  -->
 <template>
-  <div>
+  <div style="position: relative;">
     <div class="my-breadcrumb">
       <!-- 面包屑 -->
       <el-breadcrumb separator-class="el-icon-arrow-right">
@@ -19,14 +19,19 @@
     </div>
     <!-- 2. 表格区域展示视图数据 -->
     <div class="wrapper">
-      <el-table :data="tableData" max-height="470px" border>
-        <el-table-column type="selection" width="55"></el-table-column>
+      <el-table :data="tableData" max-height="470px" border @selection-change="handleSelectionChange"
+        >>
+        <el-table-column type="selection" width="55" :selectable="selectable"></el-table-column>
         <el-table-column prop="goods_id" label="商品ID" width="100"> </el-table-column>
         <el-table-column prop="goods_name" label="商品名称" width="100" show-overflow-tooltip> </el-table-column>
         <el-table-column prop="goods_price" label="商品价格" width="100"> </el-table-column>
         <el-table-column prop="goods_number" label="商品数量" width="100"> </el-table-column>
         <el-table-column prop="cat_name" label="规格类目" width="100"> </el-table-column>
-        <el-table-column prop="goods_pic" label="商品图片" show-overflow-tooltip> </el-table-column>
+        <el-table-column prop="goods_pic" label="商品图片" show-overflow-tooltip>
+          <template slot-scope="scope">
+            <img :src="scope.row.goods_pic" min-height="10px" max-height="50px" style="max-width:50px" :alt="scope.row.goods_pic" />
+          </template>
+        </el-table-column>
         <el-table-column prop="sell_point" label="商品卖点" show-overflow-tooltip> </el-table-column>
         <el-table-column prop="goods_introduce" label="商品描述" show-overflow-tooltip> </el-table-column>
         <el-table-column label="操作" width="180">
@@ -48,6 +53,10 @@
         :total="total"
       >
       </el-pagination>
+      <div class="btn-some-delete">
+        <el-button size="medium" type="danger" @click="judgeDelete(true)">{{ btnTitle }}</el-button>
+        <el-button size="medium" type="primary" @click="judgeDelete(false)" v-show="someDeleteVisible">取消</el-button>
+      </div>
     </div>
     <GoodsDialog ref="dialog" />
   </div>
@@ -56,8 +65,9 @@
 <script>
 //这⾥可以导⼊其他⽂件（⽐如：组件，⼯具js，第三⽅插件js，json⽂件，图⽚⽂件等等）
 //例如：import 《组件名称》 from '《组件路径》';
-import { doGoodsList, doSearch } from "@/api/goods";
+import { doGoodsList, doSearch, doDeleteGoods } from "@/api/goods";
 import GoodsDialog from "../goods/GoodsDialog.vue";
+
 export default {
   //import引⼊的组件需要注⼊到对象中才能使⽤
   components: {
@@ -75,6 +85,9 @@ export default {
         pageSize: 5,
         pageNum: 1,
       },
+      goodsSelectList: [],
+      btnTitle: "选择多行删除",
+      someDeleteVisible: false,
     };
   },
   //监听属性 类似于data概念
@@ -87,6 +100,7 @@ export default {
     addGoods() {
       //修改子组件实例的数据
       this.$refs.dialog.goodsForm = {
+        goods_id: "",
         goods_name: "",
         goods_price: "",
         goods_number: "",
@@ -94,7 +108,10 @@ export default {
         goods_pic: "",
         goods_introduce: "",
         cat_id: "",
+        barcode: null,
+        goods_state: null,
         created: "",
+        updated: "",
         cat_name: "",
       };
       this.$refs.dialog.dialogVisible = true;
@@ -133,15 +150,39 @@ export default {
     // 编辑操作
     handleEdit(index, goods) {
       //修改子组件实例的数据
-      this.$refs.dialog.goodsForm = 
-      this.$refs.dialog.dialogVisible = true;
+      this.$refs.dialog.goodsForm = this.$refs.dialog.dialogVisible = true;
       this.$refs.dialog.isEditOrAdd = false;
       this.$refs.dialog.goodsForm = Object.assign({}, goods);
-      this.$refs.dialog.goodsForm.created = new Date(Number(this.$refs.dialog.goodsForm.created));
+      this.$refs.dialog.goodsForm.updated = new Date(Number(this.$refs.dialog.goodsForm.updated));
+      this.$refs.dialog.setGoodsEditor();
     },
-    // 删除操作
-    handleDelete() {
-      console.log("删除");
+    // 单行删除操作
+    handleDelete(index, goods) {
+      console.log(goods);
+      let self = this;
+      self
+        .$confirm("此操作将永久删除该用户, 是否继续?", "提示", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+        })
+        .then(() => {
+          doDeleteGoods([goods]).then((ret) => {
+            let type = "error";
+            if (ret.data.code == 200) {
+              type = "success";
+            }
+            self.$message({ type: type, message: ret.data.msg, duration: 1000 });
+            self.goodsList();
+          });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除",
+            duration: 2000,
+          });
+        });
     },
     // 商品列表获取
     goodsList() {
@@ -156,6 +197,50 @@ export default {
           self.$message.error({ message: ret.data.msg, duration: 1000 });
         }
       });
+    },
+    handleSelectionChange(val) {
+      this.goodsSelectList = val;
+    },
+    // 让表格可以选择
+    judgeDelete(flag) {
+      if (this.someDeleteVisible) {
+        if (flag && this.goodsSelectList.length > 0) {
+          let self = this;
+          self
+            .$confirm("此操作将永久删除多条商品数据, 是否继续?", "提示", {
+              confirmButtonText: "确定",
+              cancelButtonText: "取消",
+              type: "warning",
+            })
+            .then(() => {
+              doDeleteGoods(self.goodsSelectList).then((ret) => {
+                let type = "error";
+                if (ret.data.code == 200) {
+                  type = "success";
+                }
+                self.$message({ type: type, message: ret.data.msg, duration: 1000 });
+                self.goodsList();
+              });
+            })
+            .catch(() => {
+              this.$message({
+                type: "info",
+                message: "已取消删除",
+                duration: 2000,
+              });
+            });
+        } else {
+          this.someDeleteVisible = false;
+          this.btnTitle = "选择多行删除";
+        }
+      } else {
+        this.someDeleteVisible = true;
+        this.btnTitle = "删除";
+      }
+    },
+    // 表格禁止选择
+    selectable() {
+      return this.someDeleteVisible;
     },
   },
   //⽣命周期 - 创建完成（可以访问当前this实例）
@@ -183,5 +268,12 @@ export default {
 }
 .wrapper {
   margin-top: 20px;
+}
+.btn-some-delete {
+  position: relative;
+  top: -45px;
+  right: 10px;
+  width: 200px;
+  z-index: 10;
 }
 </style>

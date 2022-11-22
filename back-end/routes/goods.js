@@ -20,7 +20,7 @@ router.post("/search", async (req, res, next) => {
     res.json({ code: 200, data: ret });
 })
 // 查询所有商品类目
-router.post("/getGoodsCategoryList",async (req,res,next)=>{
+router.post("/getGoodsCategoryList", async (req, res, next) => {
     let ret = await goodsDao.getGoodsCategory();
     let data = JSON.parse(JSON.stringify(ret));
     // 树化
@@ -46,6 +46,26 @@ router.post('/upload', upload.single('file'), function (req, res, next) {
     console.log('原始文件名：%s', file.originalname);
     console.log('文件大小：%s', file.size);
     console.log('文件保存路径：%s', file.path);
-    res.json({code: 200,data:{file}});
+    res.json({ code: 200, data: { file, img: `http://localhost:3000/images/${file.originalname}` } });
+});
+// 添加商品
+router.post("/addGoods", async (req, res, next) => {
+    let goods = req.body || req.params;
+    let ret = await goodsDao.addGoods(goods);
+    res.json({ code: 200, data: ret, msg: "添加商品成功" });
+});
+// 修改商品信息
+router.post("/updateGoods", async (req, res, next) => {
+    let goods = req.body || req.params;
+    let ret = await goodsDao.updateGoods(goods);
+    res.json({ code: 200, data: ret, msg: "修改商品信息成功" });
+});
+// 删除商品
+router.post("/deleteGoods", async (req, res, next) => {
+    // 前端返回对象数组
+    let goods = req.body || req.params;
+    let goodsIdArr = goods.map(val=>val.goods_id);
+    let ret = await goodsDao.deleteGoods(goodsIdArr);
+    res.json({ code: 200, data: ret, msg: "删除商品成功" });
 });
 module.exports = router;
