@@ -4,7 +4,7 @@
     <el-container>
       <el-aside width="200px">
         <el-menu
-          default-active="/system/user"
+          :default-active="menuPath"
           class="el-menu-vertical-demo"
           background-color="#354054"
           text-color="#fff"
@@ -13,15 +13,22 @@
         >
           <el-submenu v-for="menu in menuList" :key="menu.menuId" :index="menu.menuId + ''">
             <template slot="title">
-              <i :class="menu.menuLogo"></i>
-              <span>{{ menu.menuName }}</span>
+              <div class="sub-margin">
+                <i :class="menu.menuLogo"></i>
+                <span>{{ menu.menuName }}</span>
+              </div>
             </template>
-            <el-menu-item v-for="cm in menu.menus" :key="cm.menuId" :index="cm.menuUrl + ''">
+            
+              <el-menu-item v-for="cm in menu.menus" :key="cm.menuId" :index="cm.menuUrl + ''">
               <template slot="title">
+                <div class="item-margin">
                 <i :class="cm.menuLogo"></i>
                 <span>{{ cm.menuName }}</span>
+                </div>
               </template>
+              
             </el-menu-item>
+            
           </el-submenu>
         </el-menu>
         <!-- <router-link to="/user">用户管理</router-link>
@@ -38,7 +45,7 @@
           </div>
         </el-header>
         <el-main>
-          <router-view></router-view>
+          <router-view ref="menuPathData"></router-view>
         </el-main>
       </el-container>
     </el-container>
@@ -57,6 +64,7 @@ export default {
   data() {
     //这⾥存放数据
     return {
+      menuPath: "",
       user: {},
       menuList: {},
       menu: "系统管理",
@@ -75,6 +83,12 @@ export default {
     handleClose(key, keyPath) {
       console.log(key, keyPath);
     },
+    setMenuList() {
+      let self = this;
+      doMenuList().then((ret) => {
+        self.menuList = ret.data.data;
+      });
+    },
   },
   //⽣命周期 - 创建完成（可以访问当前this实例）
   created() {},
@@ -86,9 +100,8 @@ export default {
         self.user = ret.data.data;
       }
     });
-    doMenuList().then((ret) => {
-      self.menuList = ret.data.data;
-    });
+    this.setMenuList();
+    this.menuPath = this.$refs["menuPathData"].breadcrumbPath;
   },
   beforeCreate() {}, //⽣命周期 - 创建之前
   beforeMount() {}, //⽣命周期 - 挂载之前
@@ -128,8 +141,20 @@ export default {
   font-size: 20px;
   line-height: 30px;
 }
+.sub-margin{
+  width: 130px;
+  text-align: left;
+  margin-left: 20px;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+.item-margin{
+  text-align: left;
+  margin-left: 70px;
+}
 .el-menu-item {
-  padding: 0px 0 0 20px !important;
+  padding: 0 !important;
   border-bottom: 1px solid #b3c0d1;
 }
 .el-divider {

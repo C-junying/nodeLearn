@@ -6,14 +6,14 @@
       <el-breadcrumb separator-class="el-icon-arrow-right">
         <el-breadcrumb-item>首页</el-breadcrumb-item>
         <el-breadcrumb-item>商品管理</el-breadcrumb-item>
-        <el-breadcrumb-item :to="{ path: '/goods/goodsList' }">商品清单</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: breadcrumbPath }">商品清单</el-breadcrumb-item>
       </el-breadcrumb>
       <!-- 分割线 -->
       <el-divider></el-divider>
     </div>
     <!-- 1. 搜索区域 -->
     <div class="header">
-      <el-input v-model="inputSeach.search" placeholder="请输入内容"></el-input>
+      <el-input v-model="inputSeach.search" placeholder="请输入商品名称或商品卖点或商品介绍" clearable></el-input>
       <el-button type="primary" @click="searchInput">查询</el-button>
       <el-button type="primary" @click="addGoods">添加</el-button>
     </div>
@@ -27,7 +27,7 @@
         <el-table-column prop="goods_price" label="商品价格" width="100"> </el-table-column>
         <el-table-column prop="goods_number" label="商品数量" width="100"> </el-table-column>
         <el-table-column prop="cat_name" label="规格类目" width="100"> </el-table-column>
-        <el-table-column prop="goods_pic" label="商品图片" show-overflow-tooltip>
+        <el-table-column prop="goods_pic" label="商品图片" show-overflow-tooltip align="center">
           <template slot-scope="scope">
             <img :src="scope.row.goods_pic" min-height="10px" max-height="50px" style="max-width:50px" :alt="scope.row.goods_pic" />
           </template>
@@ -76,6 +76,7 @@ export default {
   data() {
     //这⾥存放数据
     return {
+      breadcrumbPath:'/goods/goodsList',
       inputSeach: {
         search: "",
       },

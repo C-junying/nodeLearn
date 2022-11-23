@@ -24,9 +24,17 @@ const login = (user) => {
 }
 // 注册
 const register = (user) => {
-    const sql = "insert into user(userName, password, email, createTime) values(?,?,?,?)";
-    const params = [user.userName, user.password, user.email, user.createTime];
-    return BaseDao.execTransection([{ sql, params }]);
+    const arr = [
+        {
+            sql: "insert into user(userName, password, email, createTime) values(?,?,?,?)",
+            params: [user.userName, user.password, user.email, user.createTime],
+        },
+        {
+            sql: "insert into user_role(userId,roleId) values(?,?)",
+            params: [user.userId, user.roleId]
+        }
+    ]
+    return BaseDao.execTransectionByReturnId(arr);
 }
 
 // 删除用户

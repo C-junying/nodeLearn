@@ -1,6 +1,16 @@
 <!--  -->
 <template>
   <div>
+    <div class="my-breadcrumb">
+      <!-- 面包屑 -->
+      <el-breadcrumb separator-class="el-icon-arrow-right">
+        <el-breadcrumb-item>首页</el-breadcrumb-item>
+        <el-breadcrumb-item>订单管理</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: breadcrumbPath }">交易订单</el-breadcrumb-item>
+      </el-breadcrumb>
+      <!-- 分割线 -->
+      <el-divider></el-divider>
+    </div>
     <!-- 主体内容	 -->
     <el-card>
       <!-- 搜索区域 -->
@@ -15,7 +25,7 @@
 
       <!-- 列表用户内容区域	 -->
       <el-table :data="orderList" border style="width: 100%">
-        <el-table-column type="index" width="180"> </el-table-column>
+        <el-table-column type="index" width="80"> </el-table-column>
         <el-table-column prop="order_number" label="订单编号" width="180"> </el-table-column>
         <el-table-column prop="order_price" label="订单价格"> </el-table-column>
         <el-table-column prop="pay_status" label="是否付款" width="180">
@@ -86,6 +96,7 @@ export default {
   data() {
     //这⾥存放数据
     return {
+      breadcrumbPath:'/system/order',
       orderList: [
         {
           order_number: "itcast-59e411eaaccc9",

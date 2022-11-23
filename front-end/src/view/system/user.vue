@@ -6,7 +6,7 @@
       <el-breadcrumb separator-class="el-icon-arrow-right">
         <el-breadcrumb-item>首页</el-breadcrumb-item>
         <el-breadcrumb-item>系统管理</el-breadcrumb-item>
-        <el-breadcrumb-item :to="{ path: '/system/user' }">用户管理</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: breadcrumbPath }">用户管理</el-breadcrumb-item>
       </el-breadcrumb>
       <!-- 分割线 -->
       <el-divider></el-divider>
@@ -93,6 +93,7 @@ export default {
   components: {},
   data() {
     return {
+      breadcrumbPath:'/system/user',
       userList: [],
       search: "",
       page: {
@@ -202,7 +203,6 @@ export default {
               self.$message({ type: type, message: ret.data.msg, duration: 1000 });
             });
           }
-          self.pageList();
           self.dialogFormVisible = false;
         } else {
           // 表单验证失败

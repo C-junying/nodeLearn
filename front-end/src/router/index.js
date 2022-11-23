@@ -34,6 +34,11 @@ export default new Router({
           component: () => import("@/components/HelloWorld")
         },
         {
+          path: '/system/role',
+          name: 'order',
+          component: () => import("@/view/system/role")
+        },
+        {
           path: '/system/order',
           name: 'order',
           component: () => import("@/view/system/order")

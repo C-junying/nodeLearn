@@ -64,14 +64,14 @@ app.use('/images', express.static(path.join(__dirname, './public/uploads')));
 
 //404 错误
 app.use(function (req, res, next) {
-  res.status(404).json({ code: 404, message: '页面不存在！' });
+  res.status(404).json({ code: 404, msg: '页面不存在！' });
 });
 // 其他错误处理
 app.use(function (err, req, res, next) {
   if (err.name === "UnauthorizedError") {
-    res.status(401).json({ code: 401, message: err.message });
+    res.status(401).json({ code: 401, msg: err.message });
   } else {
-    res.status(err.status || 500).json({ code: err.status || 500, message: err.message });
+    res.status(err.status || 500).json({ code: err.status || 500, msg: err.message });
   }
 });
 
