@@ -5,6 +5,23 @@ const roleList = () => {
     const sql = "select * from role";
     return BaseDao.execute(sql);
 }
+// 查询角色总数
+const getroleCount = () => {
+    const sql = "SELECT count(*) as count FROM role";
+    return BaseDao.execute(sql);
+}
+// 查询所有角色,分页
+const rolePageList = (page) => {
+    const sql = "select * from role limit ?,?";
+    const params = [(page.pageNum - 1) * page.pageSize, page.pageSize];
+    return BaseDao.execute(sql, params);
+}
+// 对角色名，备注模糊查询
+const getSearch = (keywords) => {
+    const sql = "select * from role where CONCAT(roleName,remark) like ?";
+    const params = ["%" + keywords.search + "%"];
+    return BaseDao.execute(sql, params);
+}
 // 添加角色
 const addRole = (role) => {
     const arr = [
@@ -15,5 +32,37 @@ const addRole = (role) => {
     ];
     return BaseDao.execTransection(arr);
 }
-
-module.exports = { roleList, addRole };
+// 修改角色信息
+const updateRole = (role) => {
+    const sql = "update role set roleName=?,remark=? where roleId=?";
+    const params = [role.roleName, role.remark, role.roleId];
+    return BaseDao.execTransection([{ sql, params }]);
+}
+// 删除角色
+const deleteRole = (role) => {
+    const arr = [
+        {
+            sql: "update user_role set roleId=null where roleId=?",
+            params: [role.roleId]
+        },
+        {
+            sql: "delete from role_menu where roleId=?",
+            params: [role.roleId]
+        },
+        {
+            sql: "delete from role where roleId=?",
+            params: [role.roleId]
+        }
+    ]
+    return BaseDao.execTransection([arr]);
+}
+// 分配角色权限
+const shareRolePower = (roleMenuArr) => {
+    var arr = roleMenuArr.map(() => {
+        return "(?,?)";
+    });
+    const sql = `insert into role_menu(roleId,menuId) values${arr.join(",")}`;
+    const params = [...roleMenuArr];
+    return BaseDao.execTransection([{ sql, params }]);
+}
+module.exports = { roleList, getroleCount, rolePageList, getSearch, addRole, updateRole, deleteRole, shareRolePower };

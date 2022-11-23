@@ -8,6 +8,26 @@ var menuDao = require("../dao/MenuDao");
 router.post('/', function (req, res, next) {
     res.send('respond with a resource');
 });
+// 获取所有菜单，角色需要
+router.post("/roleSelect", async (req, res, next) => {
+    // 调用dao获取数据
+    let ret = await menuDao.roleSelect();
+    let data = JSON.parse(JSON.stringify(ret));
+    let tree = data.filter((item) => {
+        if (item.pId === 0) {
+            return true;
+        }
+        else {
+            for (let i = 0; i < data.length; i++) {
+                if (data[i].menuId === item.pId) {
+                    data[i].menus = data[i].menus || [];
+                    data[i].menus.push(item);
+                }
+            }
+        }
+    });
+    res.json({ code: 200, data: tree });
+})
 // 获取所有一级二级菜单
 router.post("/queryAll", async (req, res, next) => {
     // 调用dao获取数据
@@ -18,7 +38,7 @@ router.post("/queryAll", async (req, res, next) => {
 router.post("/menuList", async (req, res, next) => {
     // 调用dao获取数据
     let ret = await menuDao.queryByRoleId(req.user);
-    // 二级菜单树化
+    // 树化
     let data = JSON.parse(JSON.stringify(ret));
     let tree = data.filter((item) => {
         if (item.pId === 0) {

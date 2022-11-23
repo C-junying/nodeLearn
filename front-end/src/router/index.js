@@ -36,7 +36,7 @@ export default new Router({
         {
           path: '/system/role',
           name: 'order',
-          component: () => import("@/view/system/role")
+          component: () => import("@/view/system/roles/role")
         },
         {
           path: '/system/order',

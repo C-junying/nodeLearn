@@ -12,7 +12,12 @@ const getCount = () => {
     const sql = "SELECT count(*) as count FROM menu";
     return BaseDao.execute(sql);
 }
-// 获取菜单列表
+// 获取菜单所有菜单
+const roleSelect = () => {
+    const sql = "select * from menu";
+    return BaseDao.execute(sql);
+}
+// 获取菜单列表,分页
 const getListByPage = (page) => {
     const sql = "select * from menu limit ?,?";
     const params = [(page.pageNum - 1) * page.pageSize, page.pageSize];
@@ -63,4 +68,4 @@ const deleteMenu = (menu) => {
     ];
     return BaseDao.execTransection(arr);
 }
-module.exports = { queryAll, queryByRoleId, getCount, getListByPage, getSearch, addMenu, updateMenu, deleteMenu };
+module.exports = { roleSelect, queryAll, queryByRoleId, getCount, getListByPage, getSearch, addMenu, updateMenu, deleteMenu };

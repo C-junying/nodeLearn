@@ -1,17 +1,6 @@
 <!--  -->
 <template>
-<div class=''>
-    <div class="my-breadcrumb">
-      <!-- 面包屑 -->
-      <el-breadcrumb separator-class="el-icon-arrow-right">
-        <el-breadcrumb-item>首页</el-breadcrumb-item>
-        <el-breadcrumb-item>系统管理</el-breadcrumb-item>
-        <el-breadcrumb-item :to="{ path: breadcrumbPath }">角色管理</el-breadcrumb-item>
-      </el-breadcrumb>
-      <!-- 分割线 -->
-      <el-divider></el-divider>
-    </div>
-</div>
+<el-tree :data="data" ref="tree" :props="props" show-checkbox check-on-click-node @check="nodeClick" @node-click="nodeClick"> </el-tree>
 </template>
 
 <script>
@@ -24,7 +13,11 @@ components: {},
 data() {
 //这⾥存放数据
 return {
-  breadcrumbPath:'/system/role',
+    props: {
+        label: "menuName",
+        children: "menus",
+      },
+    data: [],
 }
 },
 //监听属性 类似于data概念
@@ -33,7 +26,12 @@ computed: {},
 watch: {},
 //⽅法集合
 methods: {
-
+    // 点击tree获取数据
+    nodeClick(data) {
+      // console.log(this.$refs.tree.getCheckedNodes(true));
+      //传递数据给父组件
+      this.$emit("sendTreeData", data);
+    },
 },
 //⽣命周期 - 创建完成（可以访问当前this实例）
 created() {
@@ -41,7 +39,11 @@ created() {
 },
 //⽣命周期 - 挂载完成（可以访问DOM元素）
 mounted() {
-
+    let self = this;
+    doGoodsCategoryList().then((ret) => {
+      if (ret.data.code == 200) self.props = ret.data.data;
+      self.data = ret.data.data;
+    });
 },
 beforeCreate() {}, //⽣命周期 - 创建之前
 beforeMount() {}, //⽣命周期 - 挂载之前

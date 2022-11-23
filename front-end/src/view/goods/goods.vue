@@ -27,17 +27,17 @@
         <el-table-column prop="goods_price" label="商品价格" width="100"> </el-table-column>
         <el-table-column prop="goods_number" label="商品数量" width="100"> </el-table-column>
         <el-table-column prop="cat_name" label="规格类目" width="100"> </el-table-column>
-        <el-table-column prop="goods_pic" label="商品图片" show-overflow-tooltip align="center">
+        <el-table-column prop="goods_pic" label="商品图片" width="100" align="center">
           <template slot-scope="scope">
             <img :src="scope.row.goods_pic" min-height="10px" max-height="50px" style="max-width:50px" :alt="scope.row.goods_pic" />
           </template>
         </el-table-column>
-        <el-table-column prop="sell_point" label="商品卖点" show-overflow-tooltip> </el-table-column>
-        <el-table-column prop="goods_introduce" label="商品描述" show-overflow-tooltip> </el-table-column>
-        <el-table-column label="操作" width="180">
+        <el-table-column prop="sell_point" label="商品卖点" width="150"> </el-table-column>
+        <el-table-column prop="goods_introduce" label="商品描述" show-overflow-tooltip > </el-table-column>
+        <el-table-column label="操作" width="220">
           <template slot-scope="scope">
-            <el-button size="mini" type="primary" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-            <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+            <el-button size="mini" type="primary" icon="el-icon-edit" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+            <el-button size="mini" type="danger" icon="el-icon-delete" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -54,7 +54,7 @@
       >
       </el-pagination>
       <div class="btn-some-delete">
-        <el-button size="medium" type="danger" @click="judgeDelete(true)">{{ btnTitle }}</el-button>
+        <el-button size="medium" type="danger" icon="el-icon-delete" @click="judgeDelete(true)">{{ btnTitle }}</el-button>
         <el-button size="medium" type="primary" @click="judgeDelete(false)" v-show="someDeleteVisible">取消</el-button>
       </div>
     </div>
