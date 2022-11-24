@@ -21,6 +21,10 @@ export let doUserAdd = function(user){
 export let doDeleteUser = function(user){
     return doAuthPost("/user/delete",user);
 }
+// 修改密码
+export let doUpdatePassword = function(user){
+    return doAuthPost("/user/updatePassword",user);
+}
 // 获取用户信息
 export let doGet = function(){
     return doAuthPost("/user/get");

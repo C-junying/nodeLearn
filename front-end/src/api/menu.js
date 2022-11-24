@@ -1,5 +1,9 @@
 import { doAuthPost } from './AxoisUtils'
 
+// 获取所有菜单
+export let doRoleSelect = function(){
+    return doAuthPost("/menu/roleSelect");
+}
 // 获取所有一级二级菜单
 export let doQueryAll = function(){
     return doAuthPost("/menu/queryAll");
@@ -7,6 +11,10 @@ export let doQueryAll = function(){
 // 根据token角色ID获取菜单信息
 export let doMenuList = function () {
     return doAuthPost("/menu/menuList");
+}
+// 根据角色ID获取菜单信息
+export let doRoleIdMenuList = function (role) {
+    return doAuthPost("/menu/roleIdMenuList",role);
 }
 // 获取菜单信息,分页
 export let doGetListByPage = function (page) {

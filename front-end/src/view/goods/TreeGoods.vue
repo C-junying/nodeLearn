@@ -57,8 +57,7 @@ export default {
   mounted() {
     let self = this;
     doGoodsCategoryList().then((ret) => {
-      if (ret.data.code == 200) self.props = ret.data.data;
-      self.data = ret.data.data;
+      if (ret.data.code == 200) self.data = ret.data.data;
     });
   },
   beforeCreate() {}, //⽣命周期 - 创建之前

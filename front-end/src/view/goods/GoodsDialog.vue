@@ -243,6 +243,11 @@ export default {
         this.$refs.myEditor.editor.txt.html(this.goodsForm.goods_introduce);
       });
     },
+    clearGoodsEditor(){
+      this.$nextTick(()=>{
+        this.$refs.myEditor.editor.txt.clear();
+      });
+    }
   },
   //⽣命周期 - 创建完成（可以访问当前this实例）
   created() {},

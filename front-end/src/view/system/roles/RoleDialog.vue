@@ -10,10 +10,10 @@
     >
       <!-- 内容区域 -->
       <el-form :model="roleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
-        <el-form-item label="分配权限" prop="roleMenuList">
+        <!-- <el-form-item label="分配权限" prop="roleMenuIdArr">
           <el-button type="primary" @click="innerVisible = true">权限选择</el-button>
-          <span style="margin-left:10px;">{{ roleForm.roleMenuList }}</span>
-        </el-form-item>
+          <span style="margin-left:10px;">{{ roleForm.menuNameList }}</span>
+        </el-form-item> -->
         <el-form-item label="角色名称" prop="roleName">
           <el-input v-model="roleForm.roleName" autocomplete="off"></el-input>
         </el-form-item>
@@ -41,12 +41,13 @@
 <script>
 //这⾥可以导⼊其他⽂件（⽐如：组件，⼯具js，第三⽅插件js，json⽂件，图⽚⽂件等等）
 //例如：import 《组件名称》 from '《组件路径》';
-import TreeRole from '../roles/TreeRole.vue'
+import TreeRole from "../roles/TreeRole.vue";
+import { doAddRole, doUpdateRole } from "@/api/role";
 
 export default {
   //import引⼊的组件需要注⼊到对象中才能使⽤
   components: {
-    TreeRole
+    TreeRole,
   },
   data() {
     //这⾥存放数据
@@ -54,12 +55,14 @@ export default {
       // 判断是添加还是编辑 默认为添加true
       isEditOrAdd: true,
       dialogVisible: false, //外弹框
-      innerVisible:false,   //内弹窗
+      innerVisible: false, //内弹窗
+      treeData: {}, //接受tree数据
       roleForm: {
         roleId: "",
         roleName: "",
         remark: "",
-        roleMenuList:"",
+        roleMenuIdArr: [], //保存menuId的数组
+        menuNameList: [],
       },
       rules: {
         //校验规则
@@ -76,23 +79,57 @@ export default {
     // 关闭表单弹窗
     iconClose() {
       this.dialogVisible = false;
-      this.$refs.ruleForm.resetFields();
+      this.resetForm();
     },
     // 显示tree数据
     showTreeData() {
       this.innerVisible = false;
       //显示tree数据
-      this.roleForm.roleName = this.treeData.roleName;
-      this.roleForm.roleId = this.treeData.roleId;
+      // this.roleForm.roleMenuIdArr = this.treeData.map((val) => {
+      //   return val.menuId;
+      // });
+      // this.roleForm.menuNameList = this.treeData.map((val) => {
+      //   return val.menuName;
+      // });
+      console.log("显示tree数据");
     },
     // 获取tree数据
     sendTreeData(val) {
       console.log("tree数据", val);
-      this.treeData = val;
+      // this.treeData = val;
     },
     // 提交表单
     submitForm() {
-        alert("提交表单");
+      let self = this;
+      let submitForm = Object.assign({}, self.roleForm);
+      console.log(submitForm);
+      self.$refs["ruleForm"].validate((valid) => {
+        if (valid) {
+          if (self.isEditOrAdd) {
+            doAddRole(submitForm).then((ret) => {
+              let type = "error";
+              if (ret.data.code == 200) {
+                type = "success";
+              }
+              self.$message({ type: type, message: ret.data.msg, duration: 1000 });
+              self.$parent.pageList();
+            });
+          } else {
+            doUpdateRole(submitForm).then((ret) => {
+              let type = "error";
+              if (ret.data.code == 200) {
+                type = "success";
+              }
+              self.$message({ type: type, message: ret.data.msg, duration: 1000 });
+              self.$parent.pageList();
+            });
+          }
+          self.dialogVisible = false;
+        } else {
+          console.log("error submit!!");
+          return false;
+        }
+      });
     },
     // 重置表单
     resetForm() {
@@ -100,6 +137,8 @@ export default {
       this.roleForm = {
         roleName: "",
         remark: "",
+        roleMenuIdArr: [], //保存menuId的数组
+        menuNameList: [],
       };
     },
   },

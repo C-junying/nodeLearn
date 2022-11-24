@@ -73,7 +73,7 @@ router.post("/login", async (req, res, next) => {
 });
 // 注册
 router.post("/register", async (req, res, next) => {
-    let user = req.body;
+    let user = req.body || req.params;
     console.log(user);
     // 设置加密强度
     let salt = bcryptc.genSaltSync(10);
@@ -101,6 +101,17 @@ router.post("/update", async (req, res, next) => {
     let user = req.body || req.params;
     let ret = await userDao.updateUser(user);
     res.json({ code: 200, data: ret, msg: "用户编辑成功" });
+});
+// 修改密码
+router.post("/updatePassword", async (req, res, next) => {
+    let user = req.body || req.params;
+    console.log(user);
+    // 设置加密强度
+    let salt = bcryptc.genSaltSync(10);
+    // 用bcrypt加密
+    user.password = bcryptc.hashSync(user.password, salt);
+    let ret = await userDao.updatePassword(user);
+    res.json({ code: 200, data: ret, msg: "修改成功" });
 });
 // 获取token中的信息
 router.post("/get", async (req, res, next) => {

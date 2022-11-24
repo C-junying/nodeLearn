@@ -67,7 +67,7 @@ export default {
               // 返回登录成功
               type = "success";
               sessionStorage.setItem("token", "Bearer " + ret.data.data);
-              self.$router.push("/system/user");
+              self.$router.push("/index");
             }
             self.$message({
               type: type,

@@ -34,7 +34,7 @@ router.post("/queryAll", async (req, res, next) => {
     let ret = await menuDao.queryAll();
     res.json({ code: 200, data: ret });
 })
-//根据角色获得菜单
+//根据token角色获得菜单
 router.post("/menuList", async (req, res, next) => {
     // 调用dao获取数据
     let ret = await menuDao.queryByRoleId(req.user);
@@ -54,6 +54,13 @@ router.post("/menuList", async (req, res, next) => {
         }
     })
     res.json({ code: 200, data: tree });
+})
+//根据roleId角色获得菜单
+router.post("/roleIdMenuList", async (req, res, next) => {
+    let role = req.body || req.params;
+    // 调用dao获取数据
+    let ret = await menuDao.queryByRoleId(role);
+    res.json({ code: 200, data: ret });
 })
 // 菜单列表
 router.post("/getListByPage", async (req, res, next) => {

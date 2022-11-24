@@ -17,7 +17,7 @@ export let doUpdateRole = function(role){
     return doAuthPost("/role/updateRole",role);
 }
 // 添加角色
-export let doaddRole = function(role){
+export let doAddRole = function(role){
     return doAuthPost("/role/addRole",role);
 }
 // 删除角色

@@ -30,7 +30,16 @@ const addRole = (role) => {
             params: [role.roleName, role.remark]
         }
     ];
-    return BaseDao.execTransection(arr);
+    // if(role.roleMenuArr&&role.roleMenuArr.length>0){
+    //     let temp = role.roleMenuArr.map(()=>{
+    //         return "(?,?)";
+    //     });
+    // arr.push({
+    //     sql: `insert into role_menu(roleId,menuId) values (?,?),(?,?)`,
+    //     params: [[-1, 16], [-1, 1]]
+    // })
+    // }
+    return BaseDao.execTransectionByReturnId(arr);
 }
 // 修改角色信息
 const updateRole = (role) => {
@@ -54,15 +63,23 @@ const deleteRole = (role) => {
             params: [role.roleId]
         }
     ]
-    return BaseDao.execTransection([arr]);
+    return BaseDao.execTransection(arr);
 }
 // 分配角色权限
-const shareRolePower = (roleMenuArr) => {
-    var arr = roleMenuArr.map(() => {
-        return "(?,?)";
+const shareRolePower = (role) => {
+    const temp = role.roleMenuIdArr.map((val) => {
+        return [role.roleId, val];
     });
-    const sql = `insert into role_menu(roleId,menuId) values${arr.join(",")}`;
-    const params = [...roleMenuArr];
-    return BaseDao.execTransection([{ sql, params }]);
+    const arr = [
+        {
+            sql: "delete from role_menu where roleId=?",
+            params: [role.roleId]
+        },
+        {
+            sql: `insert into role_menu(roleId,menuId) values ?`,
+            params: [temp]
+        }
+    ]
+    return BaseDao.execTransection(arr);
 }
 module.exports = { roleList, getroleCount, rolePageList, getSearch, addRole, updateRole, deleteRole, shareRolePower };

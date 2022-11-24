@@ -12,21 +12,22 @@
       <el-divider></el-divider>
     </div>
     <el-table :data="userList" border class="el-table infinite-list" style="width: 100%" max-height="530px">
-      <el-table-column label="ID" prop="userId"> </el-table-column>
-      <el-table-column label="用户名" prop="userName"> </el-table-column>
-      <el-table-column label="邮箱" prop="email"> </el-table-column>
+      <el-table-column label="ID" prop="userId" width="150"> </el-table-column>
+      <el-table-column label="用户名" prop="userName" width="270"> </el-table-column>
+      <el-table-column label="邮箱" prop="email" width="270"> </el-table-column>
       <!-- <el-table-column label="密码" prop="password"> </el-table-column> -->
-      <el-table-column label="日期" prop="createTime">
+      <el-table-column label="日期" prop="createTime" width="270">
         <template slot-scope="scope">
           <span>{{ scope.row.createTime | dateFormat }}</span>
         </template>
       </el-table-column>
-      <el-table-column align="right">
+      <el-table-column align="center">
         <template slot="header">
           <!-- <el-input v-model="search" size="mini" placeholder="输入关键字搜索" /> -->
           <el-button type="primary" @click="handleAdd">添加</el-button>
         </template>
         <template slot-scope="scope">
+          <el-button size="mini" type="warning" icon="el-icon-star-on" @click="handlePassword(scope.$index, scope.row)">修改密码</el-button>
           <el-button size="mini" type="primary" icon="el-icon-edit" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
           <el-button size="mini" type="danger" icon="el-icon-delete" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
         </template>
@@ -45,14 +46,14 @@
     >
     </el-pagination>
 
-    <!-- 弹出框 -->
+    <!-- 弹出框 添加用户，编辑用户 -->
     <el-dialog :title="title" :before-close="iconClose" :visible.sync="dialogFormVisible" style="line-height:20px">
       <el-form :model="userForm" :rules="rules" ref="userForm">
         <el-form-item label="用户名" prop="userName" :label-width="formLabelWidth">
           <el-input v-model="userForm.userName" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="密码" prop="password" :label-width="formLabelWidth">
-          <el-input v-model="userForm.password" autocomplete="off"></el-input>
+          <el-input v-model="userForm.password" autocomplete="off" :disabled="!isEditOrAdd"></el-input>
         </el-form-item>
         <el-form-item label="邮箱" prop="email" :label-width="formLabelWidth">
           <el-input v-model="userForm.email" autocomplete="off"></el-input>
@@ -79,13 +80,28 @@
         <el-button type="primary" @click="userSubmit">确 定</el-button>
       </div>
     </el-dialog>
+    <!-- 弹出框 修改密码 -->
+    <el-dialog title="修改密码" :before-close="passwordClose" :visible.sync="passwordVisible" style="line-height:20px">
+      <el-form :model="userPassword" :rules="rules" ref="userPassword">
+        <el-form-item label="用户ID" prop="userId" :label-width="formLabelWidth">
+          <el-input v-model="userPassword.userId" autocomplete="off" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="密码" prop="password" :label-width="formLabelWidth">
+          <el-input v-model="userPassword.password" autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="passwordClose">取 消</el-button>
+        <el-button type="primary" @click="passwordSubmit">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 //这⾥可以导⼊其他⽂件（⽐如：组件，⼯具js，第三⽅插件js，json⽂件，图⽚⽂件等等）
 //例如：import 《组件名称》 from '《组件路径》';
-import { doUserList, doUserEdit, doUserAdd, doDeleteUser } from "@/api/user";
+import { doUserList, doUserEdit, doUserAdd, doDeleteUser, doUpdatePassword } from "@/api/user";
 import { doRoleList } from "@/api/role";
 
 export default {
@@ -93,7 +109,7 @@ export default {
   components: {},
   data() {
     return {
-      breadcrumbPath:'/system/user',
+      breadcrumbPath: "/system/user",
       userList: [],
       search: "",
       page: {
@@ -109,10 +125,15 @@ export default {
         email: "",
         createTime: "",
       },
+      userPassword: {
+        userId: "",
+        password: "",
+      },
       // 添加编辑操作
       dialogFormVisible: false, // 显示隐藏控制
       // 判断是添加还是编辑 默认为添加true
       isEditOrAdd: true,
+      passwordVisible: false, //修改密码弹出框
       roleList: [],
       rules: {
         email: [
@@ -167,7 +188,7 @@ export default {
       this.userForm.createTime = new Date(Number(this.userForm.createTime));
     },
     // 关闭弹窗
-    iconClose(){
+    iconClose() {
       this.dialogFormVisible = false;
       this.$refs.userForm.resetFields();
     },
@@ -188,9 +209,9 @@ export default {
               let type = "error";
               if (ret.data.code == 200) {
                 type = "success";
-                self.pageList();
               }
               self.$message({ type: type, message: ret.data.msg, duration: 1000 });
+              self.pageList();
             });
           } else {
             // 编辑用户
@@ -198,9 +219,9 @@ export default {
               let type = "error";
               if (ret.data.code == 200) {
                 type = "success";
-                self.pageList();
               }
               self.$message({ type: type, message: ret.data.msg, duration: 1000 });
+              self.pageList();
             });
           }
           self.dialogFormVisible = false;
@@ -235,7 +256,7 @@ export default {
           this.$message({
             type: "info",
             message: "已取消删除",
-            duration: 2000
+            duration: 2000,
           });
         });
     },
@@ -258,6 +279,44 @@ export default {
           self.total = ret.data.data.count;
         } else {
           self.$message.error({ message: ret.data.msg, duration: 1000 });
+        }
+      });
+    },
+    // 显示密码框
+    handlePassword(index, user) {
+      console.log(index, user);
+      this.passwordVisible = true;
+      this.userPassword.userId = user.userId;
+    },
+    // 关闭密码框
+    passwordClose() {
+      console.log("关闭密码框");
+      this.passwordVisible = false;
+      this.$refs.userPassword.resetFields();
+      this.userPassword = {
+        userId: "",
+        password: "",
+      };
+    },
+    // 修改密码
+    passwordSubmit() {
+      let self = this;
+      // 表单验证
+      self.$refs["userPassword"].validate((valid) => {
+        if (valid) {
+          doUpdatePassword(this.userPassword).then(ret=>{
+            let type = "error";
+            if (ret.data.code == 200) {
+              type = "success";
+            }
+            this.passwordVisible = false;
+            self.$message({ type: type, message: ret.data.msg, duration: 1000 });
+            self.pageList();
+          })
+        } else {
+          // 表单验证失败
+          alert("error submit!!");
+          return false;
         }
       });
     },

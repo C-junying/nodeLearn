@@ -69,4 +69,14 @@ const updateUser = (user) => {
     ]
     return BaseDao.execTransection(arr);
 }
-module.exports = { queryAll, getListByPage, getCount, login, register, deleteUser, updateUser }
+// 修改密码
+const updatePassword = (user)=>{
+    const arr = [
+        {
+            sql:"update user set password=? where userId=?",
+            params:[user.password,user.userId]
+        }
+    ]
+    return BaseDao.execTransection(arr);
+}
+module.exports = { queryAll, getListByPage, getCount, login, register, deleteUser, updateUser,updatePassword }

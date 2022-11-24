@@ -117,6 +117,7 @@ export default {
       };
       this.$refs.dialog.dialogVisible = true;
       this.$refs.dialog.isEditOrAdd = true;
+      this.$refs.dialog.clearGoodsEditor();
     },
     handleCurrentChange(val) {
       // 修改当前页
@@ -151,7 +152,7 @@ export default {
     // 编辑操作
     handleEdit(index, goods) {
       //修改子组件实例的数据
-      this.$refs.dialog.goodsForm = this.$refs.dialog.dialogVisible = true;
+      this.$refs.dialog.dialogVisible = true;
       this.$refs.dialog.isEditOrAdd = false;
       this.$refs.dialog.goodsForm = Object.assign({}, goods);
       this.$refs.dialog.goodsForm.updated = new Date(Number(this.$refs.dialog.goodsForm.updated));

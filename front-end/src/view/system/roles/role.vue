@@ -46,25 +46,41 @@
       :total="total"
     >
     </el-pagination>
+    <!-- 角色添加或编辑 -->
     <RoleDialog ref="dialog" />
+    <!-- 权限选择 -->
+    <el-dialog width="40%" title="权限选择" :visible.sync="innerVisible" append-to-body style="margin-top:-8vh">
+      <div>
+        <span>{{ menuNameList }}</span>
+      </div>
+      <TreeRole @sendTreeData="sendTreeData" />
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="innerVisible = false">取 消</el-button>
+        <el-button type="primary" @click="showTreeData">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 //这⾥可以导⼊其他⽂件（⽐如：组件，⼯具js，第三⽅插件js，json⽂件，图⽚⽂件等等）
 //例如：import 《组件名称》 from '《组件路径》';
-import { doGetListByPage, doSearch } from "@/api/role";
+import { doGetListByPage, doSearch, doShareRolePower,doDeleteRole } from "@/api/role";
+import { doRoleIdMenuList } from "@/api/menu";
 import RoleDialog from "../roles/RoleDialog.vue";
+import TreeRole from "../roles/TreeRole.vue";
 
 export default {
   //import引⼊的组件需要注⼊到对象中才能使⽤
   components: {
     RoleDialog,
+    TreeRole,
   },
   data() {
     //这⾥存放数据
     return {
       breadcrumbPath: "/system/role",
+      innerVisible: false, //内弹窗
       roleList: [],
       page: {
         pageSize: 5,
@@ -75,6 +91,13 @@ export default {
         search: "",
       },
       formLabelWidth: "100px",
+      treeData: [], //接受tree数据
+      menuNameList: [], //显示在tree里
+      roleTree: {
+        roleId: "",
+        roleMenuIdArr: [],
+      },
+      menuList:[],  //懒加载menu数据
     };
   },
   //监听属性 类似于data概念
@@ -100,13 +123,52 @@ export default {
         } else {
           self.roleList = [];
           self.total = 0;
-          self.$message({ type: "error", message: "没有任何商品记录", duration: 2000 });
+          self.$message({ type: "error", message: "没有任何角色记录", duration: 2000 });
         }
+      });
+    },
+    // 为角色分配tree数据
+    showTreeData() {
+      if (this.roleTree.roleMenuIdArr.length > 0) {
+        doShareRolePower(this.roleTree).then((ret) => {
+          let type = "error";
+          if (ret.data.code == 200) {
+            type = "success";
+          }
+          this.$message({ type: type, message: ret.data.msg, duration: 1000 });
+          this.pageList();
+          this.innerVisible = false;
+        });
+      } else {
+        this.innerVisible = true;
+        this.$message({ type: "error", message: "请选择权限", duration: 1000 });
+      }
+    },
+    // 获取tree数据
+    sendTreeData(val) {
+      console.log("tree数据", val);
+      this.roleTree.roleMenuIdArr = val.map((val) => {
+        return val.menuId;
+      });
+      this.menuNameList = val.map((val) => {
+        return val.menuName;
       });
     },
     // 分配角色权限
     handleSharePower(index, role) {
       console.log(index, role);
+      this.innerVisible = true;
+      this.roleTree = {
+        roleId: role.roleId,
+        roleMenuIdArr: [],
+      };
+      doRoleIdMenuList(role).then((ret) => {
+        if (ret.data.code == 200) {
+          this.menuNameList = ret.data.data.map((val) => {
+            return val.menuName;
+          });
+        }
+      });
     },
     // 添加角色
     addRole() {
@@ -114,6 +176,8 @@ export default {
         roleId: "",
         roleName: "",
         remark: "",
+        roleMenuIdArr: [], //保存menuId的数组
+        menuNameList: [],
       };
       this.$refs.dialog.dialogVisible = true;
       this.$refs.dialog.isEditOrAdd = true;
@@ -122,13 +186,48 @@ export default {
     handleEdit(index, role) {
       console.log(index, role);
       //修改子组件实例的数据
-      this.$refs.dialog.roleForm = this.$refs.dialog.dialogVisible = true;
-      this.$refs.dialog.isEditOrAdd = false;
-      this.$refs.dialog.roleForm = Object.assign({}, role);
+      doRoleIdMenuList(role).then((ret) => {
+        if (ret.data.code == 200) {
+          this.$refs.dialog.isEditOrAdd = false;
+          this.$refs.dialog.roleForm = Object.assign({}, role);
+          this.$refs.dialog.roleForm.roleMenuIdArr = ret.data.data.map((val) => {
+            return val.menuId;
+          });
+          this.$refs.dialog.roleForm.menuNameList = ret.data.data.map((val) => {
+            return val.menuName;
+          });
+          this.$refs.dialog.dialogVisible = true;
+          console.log(this.$refs.dialog.roleForm);
+        }
+      });
     },
     // 删除角色
     handleDelete(index, role) {
       console.log(index, role);
+      let self = this;
+      self
+        .$confirm("此操作将永久删除该角色, 是否继续?", "提示", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+        })
+        .then(() => {
+          doDeleteRole(role).then((ret) => {
+            let type = "error";
+            if (ret.data.code == 200) {
+              type = "success";
+            }
+            self.$message({ type: type, message: ret.data.msg, duration: 1000 });
+            self.pageList();
+          });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除",
+            duration: 2000,
+          });
+        });
     },
     handleCurrentChange(val) {
       // 修改当前页

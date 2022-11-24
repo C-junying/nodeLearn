@@ -6,6 +6,7 @@
 <script>
 //这⾥可以导⼊其他⽂件（⽐如：组件，⼯具js，第三⽅插件js，json⽂件，图⽚⽂件等等）
 //例如：import 《组件名称》 from '《组件路径》';
+import { doRoleSelect } from "@/api/menu";
 
 export default {
   //import引⼊的组件需要注⼊到对象中才能使⽤
@@ -27,10 +28,10 @@ export default {
   //⽅法集合
   methods: {
     // 点击tree获取数据
-    nodeClick(data) {
-      // console.log(this.$refs.tree.getCheckedNodes(true));
+    nodeClick() {
+      // console.log(this.$refs.tree,this.$refs.tree.getCheckedNodes(false,true));
       //传递数据给父组件
-      this.$emit("sendTreeData", data);
+      this.$emit("sendTreeData", this.$refs.tree.getCheckedNodes(false,true));
     },
   },
   //⽣命周期 - 创建完成（可以访问当前this实例）
@@ -38,9 +39,8 @@ export default {
   //⽣命周期 - 挂载完成（可以访问DOM元素）
   mounted() {
     let self = this;
-    doGoodsCategoryList().then((ret) => {
-      if (ret.data.code == 200) self.props = ret.data.data;
-      self.data = ret.data.data;
+    doRoleSelect().then((ret) => {
+      if (ret.data.code == 200) self.data = ret.data.data;
     });
   },
   beforeCreate() {}, //⽣命周期 - 创建之前
