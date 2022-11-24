@@ -49,13 +49,13 @@
     <!-- 角色添加或编辑 -->
     <RoleDialog ref="dialog" />
     <!-- 权限选择 -->
-    <el-dialog width="40%" title="权限选择" :visible.sync="innerVisible" append-to-body style="margin-top:-8vh">
+    <el-dialog width="40%" :before-close="shareDialogClose" title="权限选择" :visible.sync="innerVisible" append-to-body style="margin-top:-8vh">
       <div>
-        <span>{{ menuNameList }}</span>
+        <span>{{ menuIdNameList.menuNameList }}</span>
       </div>
-      <TreeRole @sendTreeData="sendTreeData" />
+      <TreeRole @sendTreeData="sendTreeData" ref="shareDialog" />
       <span slot="footer" class="dialog-footer">
-        <el-button @click="innerVisible = false">取 消</el-button>
+        <el-button @click="shareDialogClose">取 消</el-button>
         <el-button type="primary" @click="showTreeData">确 定</el-button>
       </span>
     </el-dialog>
@@ -92,7 +92,10 @@ export default {
       },
       formLabelWidth: "100px",
       treeData: [], //接受tree数据
-      menuNameList: [], //显示在tree里
+      menuIdNameList: {
+        menuIdList:[],
+        menuNameList:[],
+      }, //显示在tree里
       roleTree: {
         roleId: "",
         roleMenuIdArr: [],
@@ -138,6 +141,7 @@ export default {
           this.$message({ type: type, message: ret.data.msg, duration: 1000 });
           this.pageList();
           this.innerVisible = false;
+          this.$refs.shareDialog.clearSelectTree();
         });
       } else {
         this.innerVisible = true;
@@ -150,9 +154,14 @@ export default {
       this.roleTree.roleMenuIdArr = val.map((val) => {
         return val.menuId;
       });
-      this.menuNameList = val.map((val) => {
+      this.menuIdNameList.menuNameList = val.map((val) => {
         return val.menuName;
       });
+    },
+    // 关闭树组件
+    shareDialogClose(){
+      this.innerVisible = false;
+      this.$refs.shareDialog.clearSelectTree();
     },
     // 分配角色权限
     handleSharePower(index, role) {
@@ -164,9 +173,12 @@ export default {
       };
       doRoleIdMenuList(role).then((ret) => {
         if (ret.data.code == 200) {
-          this.menuNameList = ret.data.data.map((val) => {
+          this.menuIdNameList.menuNameList = ret.data.data.map((val) => {
             return val.menuName;
           });
+          this.$nextTick(()=>{
+            this.$refs.shareDialog.setSelectTree(ret.data.data);
+          })
         }
       });
     },
@@ -176,8 +188,8 @@ export default {
         roleId: "",
         roleName: "",
         remark: "",
-        roleMenuIdArr: [], //保存menuId的数组
         menuNameList: [],
+        menu:[],
       };
       this.$refs.dialog.dialogVisible = true;
       this.$refs.dialog.isEditOrAdd = true;
@@ -190,14 +202,11 @@ export default {
         if (ret.data.code == 200) {
           this.$refs.dialog.isEditOrAdd = false;
           this.$refs.dialog.roleForm = Object.assign({}, role);
-          this.$refs.dialog.roleForm.roleMenuIdArr = ret.data.data.map((val) => {
-            return val.menuId;
-          });
+          this.$refs.dialog.roleForm.menu = ret.data.data;
           this.$refs.dialog.roleForm.menuNameList = ret.data.data.map((val) => {
             return val.menuName;
           });
           this.$refs.dialog.dialogVisible = true;
-          console.log(this.$refs.dialog.roleForm);
         }
       });
     },

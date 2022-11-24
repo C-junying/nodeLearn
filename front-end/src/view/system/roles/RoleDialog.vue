@@ -10,10 +10,10 @@
     >
       <!-- 内容区域 -->
       <el-form :model="roleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
-        <!-- <el-form-item label="分配权限" prop="roleMenuIdArr">
-          <el-button type="primary" @click="innerVisible = true">权限选择</el-button>
+        <el-form-item label="分配权限" prop="menuNameList">
+          <el-button type="primary" @click="handleSharePower">权限选择</el-button>
           <span style="margin-left:10px;">{{ roleForm.menuNameList }}</span>
-        </el-form-item> -->
+        </el-form-item>
         <el-form-item label="角色名称" prop="roleName">
           <el-input v-model="roleForm.roleName" autocomplete="off"></el-input>
         </el-form-item>
@@ -28,7 +28,7 @@
       </div>
       <!-- 1. 内弹框--- 类目选择 -->
       <el-dialog width="40%" title="类目选择" :visible.sync="innerVisible" append-to-body style="margin-top:-8vh">
-        <TreeRole @sendTreeData="sendTreeData" />
+        <TreeRole @sendTreeData="sendTreeData" ref="shareDialog"/>
         <span slot="footer" class="dialog-footer">
           <el-button @click="innerVisible = false">取 消</el-button>
           <el-button type="primary" @click="showTreeData">确 定</el-button>
@@ -61,8 +61,8 @@ export default {
         roleId: "",
         roleName: "",
         remark: "",
-        roleMenuIdArr: [], //保存menuId的数组
         menuNameList: [],
+        menu:[],
       },
       rules: {
         //校验规则
@@ -81,27 +81,35 @@ export default {
       this.dialogVisible = false;
       this.resetForm();
     },
+    // 权限分配弹窗
+    handleSharePower(){
+      this.innerVisible = true;
+      this.$nextTick(()=>{
+        this.$refs.shareDialog.setSelectTree(this.roleForm.menu);
+      });
+    },
     // 显示tree数据
     showTreeData() {
       this.innerVisible = false;
       //显示tree数据
-      // this.roleForm.roleMenuIdArr = this.treeData.map((val) => {
-      //   return val.menuId;
-      // });
-      // this.roleForm.menuNameList = this.treeData.map((val) => {
-      //   return val.menuName;
-      // });
+      this.roleForm.menu = this.treeData;
+      this.roleForm.menuNameList = this.treeData.map((val) => {
+        return val.menuName;
+      });
       console.log("显示tree数据");
     },
     // 获取tree数据
     sendTreeData(val) {
       console.log("tree数据", val);
-      // this.treeData = val;
+      this.treeData = val;
     },
     // 提交表单
     submitForm() {
       let self = this;
       let submitForm = Object.assign({}, self.roleForm);
+      submitForm.roleMenuIdArr = submitForm.menu.map(val=>{
+        return val.menuId;
+      });
       console.log(submitForm);
       self.$refs["ruleForm"].validate((valid) => {
         if (valid) {
@@ -137,9 +145,11 @@ export default {
       this.roleForm = {
         roleName: "",
         remark: "",
-        roleMenuIdArr: [], //保存menuId的数组
         menuNameList: [],
+        menu:[],
       };
+      if(!!this.$refs.shareDialog)
+        this.$refs.shareDialog.clearSelectTree();
     },
   },
   //⽣命周期 - 创建完成（可以访问当前this实例）

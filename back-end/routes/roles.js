@@ -26,20 +26,19 @@ router.post("/search", async (req, res, next) => {
 // 添加角色
 router.post("/addRole", async (req, res, next) => {
     let role = req.body || req.params;
-    // console.log("Hello",role.roleMenuIdArr);
-    // role.roleMenuIdArr = Array.from(JSON.parse(role.roleMenuIdArr));
-    // if (role.roleMenuIdArr) {
-    //     role.roleMenuArr = role.roleMenuIdArr.map((val) => {
-    //         return [-1, val];
-    //     });
-    // }
-    // console.log(role.roleMenuArr);
+    role.roleMenuArr = role.roleMenuIdArr.map((val) => {
+        return [-1, val];
+    });
     let ret = await roleDao.addRole(role);
     res.json({ code: 200, data: ret,role ,msg: "添加角色成功" });
 })
 // 修改角色信息
 router.post("/updateRole", async (req, res, next) => {
     let role = req.body || req.params;
+    role.roleMenuIdArr = Array.from(role.roleMenuIdArr);
+    role.roleMenuArr = role.roleMenuIdArr.map((val) => {
+        return [role.roleId, val];
+    });
     let ret = await roleDao.updateRole(role);
     res.json({ code: 200, data: ret, msg: "编辑角色成功" });
 })

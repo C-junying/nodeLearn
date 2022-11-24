@@ -114,7 +114,17 @@ const execTransectionByReturnId = (sqlArr) => {
                     sqlArr.splice(0, 1)
                     // 更新每个params数组的第一个参数为刚插入主键
                     for (const { sql, params } of sqlArr) {
-                        params[0] = id;
+                        let flag = params.every(val=>{
+                            return Array.isArray(val);
+                        });
+                        if(!flag){
+                            params[0] = id;
+                        }else{
+                            for(const firstElement of params[0]){
+                                firstElement[0] = id;
+                            };
+                            // 希望@params = [[],[],[]]  这种类型的数组
+                        }
                         await new Promise((resolve, reject) => {
                             connection.query(sql, params, (e, rows, fields) => {
                                 e ? reject(e) : resolve(rows.insertId)

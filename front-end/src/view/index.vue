@@ -146,7 +146,11 @@ export default {
       }
     });
     this.setMenuList();
-    this.menuPath = this.$refs["menuPathData"].breadcrumbPath;
+    if(!!this.$refs["menuPathData"])
+      this.menuPath = this.$refs["menuPathData"].breadcrumbPath;
+    else{
+      this.menuPath = '';
+    }
   },
   beforeCreate() {}, //⽣命周期 - 创建之前
   beforeMount() {}, //⽣命周期 - 挂载之前

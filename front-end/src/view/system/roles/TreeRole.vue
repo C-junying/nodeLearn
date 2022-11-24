@@ -1,6 +1,16 @@
 <!--  -->
 <template>
-  <el-tree :data="data" ref="tree" :props="props" show-checkbox check-on-click-node @check="nodeClick" @node-click="nodeClick"> </el-tree>
+  <el-tree
+    :data="data"
+    node-key="menuId"
+    ref="tree"
+    :props="props"
+    show-checkbox
+    check-on-click-node
+    @check="nodeClick"
+    @node-click="nodeClick"
+  >
+  </el-tree>
 </template>
 
 <script>
@@ -19,19 +29,48 @@ export default {
         children: "menus",
       },
       data: [],
+      treeData:[],
     };
   },
   //监听属性 类似于data概念
   computed: {},
   //监控data中的数据变化
-  watch: {},
+  watch: {
+    data(){
+      this.treeData.forEach((ele) => {
+        // 把已选中的复选框清除
+        this.$nextTick(() => {
+          this.$refs.tree.setChecked(ele.menuId, true, true);
+        });
+      });
+    }
+  },
   //⽅法集合
   methods: {
     // 点击tree获取数据
     nodeClick() {
       // console.log(this.$refs.tree,this.$refs.tree.getCheckedNodes(false,true));
       //传递数据给父组件
-      this.$emit("sendTreeData", this.$refs.tree.getCheckedNodes(false,true));
+      this.$emit("sendTreeData", this.$refs.tree.getCheckedNodes(false, true));
+    },
+    // 清除角色树组件的选择
+    clearSelectTree() {
+      this.data.forEach((ele) => {
+        // 把已选中的复选框清除
+        this.$nextTick(() => {
+          this.$refs.tree.setChecked(ele.menuId, false, true);
+        });
+      });
+    },
+    // 选择角色已有的选择
+    setSelectTree(treeData) {
+      this.treeData =treeData;
+      treeData.forEach((ele) => {
+        // 把已选中的复选框清除
+        this.$nextTick(() => {
+          this.$refs.tree.setChecked(ele.menuId, true, false);
+        });
+      });
     },
   },
   //⽣命周期 - 创建完成（可以访问当前this实例）

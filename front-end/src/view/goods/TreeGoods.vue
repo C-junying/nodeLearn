@@ -18,7 +18,7 @@
         -->
   <!-- <el-tree :data="data" :props="props" show-checkbox check-on-click-node @check="nodeClick"> </el-tree> -->
   <!-- <el-tree :data="data" ref="tree" :props="props" show-checkbox check-on-click-node @check="nodeClick" @node-click="nodeClick"> </el-tree> -->
-  <el-tree :data="data" :props="props" @node-click="nodeClick"> </el-tree>
+  <el-tree :data="data" node-key="id" :props="props" @node-click="nodeClick"> </el-tree>
 </template>
 
 <script>
@@ -32,6 +32,7 @@ export default {
     //这⾥存放数据
     return {
       props: {
+        id:"cat_id",
         label: "cat_name",
         children: "cats",
       },
